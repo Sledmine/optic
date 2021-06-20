@@ -17,6 +17,10 @@ this repository aims to be the standard for medals released under the Mercury re
 free to contribute by pull requests or discussing on the
 [Shadowmods Discord Server](https://discord.shadowmods.net).
 
+This project is possible thanks to [Harmony](https://github.com/JerryBrick/harmony),
+[Chimera](https://github.com/SnowyMouse/chimera),
+[Mercury](https://github.com/Sledmine/Mercury) and [lua-blam](https://github.com/Sledmine/lua-blam).
+
 # Supported Medals
 Right now the project is aiming to provide an acceptable quantity of medals from Halo 4 as an
 standard for medals available to recreate on Halo Custom Edition.
@@ -37,7 +41,7 @@ Also this project provides simple hitmaker support.
 New medals will be added across time, be sure to follow us on our Discord server for every upcoming
 release with new features, fixes and medals.
 
-# Installation
+# Downloading and Installation
 
 Get it on [Mercury](https://github.com/Sledmine/Mercury) by using the following command:
 ```
