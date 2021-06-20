@@ -44,3 +44,6 @@ luac.out
 
 # IntelliJ IDEA
 .idea
+
+# Distribution
+dist/

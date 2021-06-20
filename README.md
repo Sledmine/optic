@@ -18,6 +18,8 @@ free to contribute by pull requests or discussing on the
 [Shadowmods Discord Server](https://discord.shadowmods.net).
 
 # Supported Medals
+Right now the project is aiming to provide an acceptable quantity of medals from Halo 4 as an
+standard for medals available to recreate on Halo Custom Edition.
 
 - Kill
 - Double Kill
@@ -26,4 +28,11 @@ free to contribute by pull requests or discussing on the
 - Killing Spree
 - Running Riot
 - Snapshopt (Beta)
+- Rocket Kill
+- Needler Kill
 - Close Call
+
+Also this project provides simple hitmaker support.
+
+New medals will be added across time, be sure to follow us on our Discord server for every upcoming
+release with new features, fixes and medals.

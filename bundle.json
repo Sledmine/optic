@@ -1,0 +1,12 @@
+{
+    "target": "lua53",
+    "output": "dist\\optic.lua",
+    "main": "optic",
+    "name": "Optic",
+    "include": [
+        "lua\\"
+    ],
+    "modules": [
+        "blam"
+    ]
+}

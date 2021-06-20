@@ -46,7 +46,8 @@ local addressList = {
     cameraType = 0x00647498, -- from Giraffe
     gamePaused = 0x004ACA79,
     gameOnMenus = 0x00622058,
-    joystickInput = 0x64D998 -- from aLTis
+    joystickInput = 0x64D998, -- from aLTis
+    firstPerson = 0x40000EB8 -- from aLTis
 }
 
 -- Tag classes values
@@ -1476,6 +1477,15 @@ local modelAnimationsStructure = {
     }
 }
 
+---@class weapon : blamObject
+---@field pressedReloadKey boolean Is weapon trying to reload
+---@field isWeaponPunching boolean Is weapon playing melee or grenade animation
+
+local weaponStructure = extendStructure(objectStructure, {
+    pressedReloadKey = {type = "bit", offset = 0x230, bitLevel = 3},
+    isWeaponPunching = {type = "bit", offset = 0x230, bitLevel = 4}
+})
+
 ---@class weaponTag
 ---@field model number Tag ID of the weapon model
 
@@ -1611,6 +1621,13 @@ local globalsTagStructure = {
             unit = {type = "dword", offset = 0x1C}
         }
     }
+}
+
+---@class firstPerson
+---@field weaponObjectId number Weapon Id from the first person view
+
+local firstPersonStructure = {
+    weaponObjectId = {type = "dword", offset = 0x10}
 }
 
 ------------------------------------------------------------------------------
@@ -1905,6 +1922,16 @@ function blam.modelAnimations(tag)
     return nil
 end
 
+--- Create a Weapon object from the given object address
+---@param address number
+---@return weapon
+function blam.weapon(address)
+    if (isValid(address)) then
+        return createObject(address, weaponStructure)
+    end
+    return nil
+end
+
 --- Create a Weapon tag object from a tag path or id
 ---@param tag string | number
 ---@return weaponTag
@@ -1939,6 +1966,13 @@ function blam.globalsTag(tag)
         return createObject(globalsTag.data, globalsTagStructure)
     end
     return nil
+end
+
+--- Create a First person object from a given address, game known address by default
+---@param address number
+---@return firstPerson
+function blam.firstPerson(address)
+    return createObject(address or addressList.firstPerson, firstPersonStructure)
 end
 
 return blam
