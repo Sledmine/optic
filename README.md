@@ -27,7 +27,7 @@ standard for medals available to recreate on Halo Custom Edition.
 - Killtacular
 - Killing Spree
 - Running Riot
-- Snapshopt (Beta)
+- Snapshot (Beta)
 - Rocket Kill
 - Needler Kill
 - Close Call
@@ -36,3 +36,10 @@ Also this project provides simple hitmaker support.
 
 New medals will be added across time, be sure to follow us on our Discord server for every upcoming
 release with new features, fixes and medals.
+
+# Installation
+
+Get it on [Mercury](https://github.com/Sledmine/Mercury) by using the following command:
+```
+mercury install optic
+```
