@@ -21,6 +21,13 @@ This project is possible thanks to [Harmony](https://github.com/JerryBrick/harmo
 [Chimera](https://github.com/SnowyMouse/chimera),
 [Mercury](https://github.com/Sledmine/Mercury) and [lua-blam](https://github.com/Sledmine/lua-blam).
 
+# Downloading and Installation
+
+Get it on [Mercury](https://github.com/Sledmine/Mercury) by using the following command:
+```
+mercury install optic
+```
+
 # Supported Medals
 Right now the project is aiming to provide an acceptable quantity of medals from Halo 4 as an
 standard for medals available to recreate on Halo Custom Edition.
@@ -41,9 +48,14 @@ Also this project provides simple hitmaker support.
 New medals will be added across time, be sure to follow us on our Discord server for every upcoming
 release with new features, fixes and medals.
 
-# Downloading and Installation
+# FAQ
+## Why there are not many medals as HAC2 had once a time?
+This is an entire new project that uses Harmony as the core tool to render medals animations on the 
+game, meaning that the engine or system to handle game actions to eventually convert them into 
+medals, needed to be built from zero in order to create a better and flexible system than the
+presented by HAC2, more and better medals will come later after different releases.
 
-Get it on [Mercury](https://github.com/Sledmine/Mercury) by using the following command:
-```
-mercury install optic
-```
+## Why some medals are not working on protected maps?
+This optic project uses lua-blam as a tool to determine different events happening on the game,
+if the map you are playing is "protected" lua-blam will have some problems at getting the required
+information from the game memory resulting in some medalls not being able to be triggered.
