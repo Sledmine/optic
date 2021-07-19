@@ -31,7 +31,13 @@ local events = {
 }
 local currentStyle = "h4"
 local imagesPath = "%s/images/%s.png"
+--local defaultMedalSize = 70
 local playerData = {deaths = 0, kills = 0, noKillSinceDead = false}
+local screenWidth = read_word(0x637CF2)
+local screenHeight = read_word(0x637CF0)
+-- FIXME There should be a better way to scale this, I just did simple math to obtain this value
+--local defaultMedalSize = (screenHeight * 0.065) - 1
+local defaultMedalSize = (screenHeight / 15) - 1
 
 ---@class sprite
 ---@field name string Name of the image file name of the sprite
@@ -41,27 +47,27 @@ local playerData = {deaths = 0, kills = 0, noKillSinceDead = false}
 ---@field callback string
 
 local sprites = {
-    kill = {name = "normal_kill", width = 64, height = 64},
-    doubleKill = {name = "double_kill", width = 64, height = 64},
-    tripleKill = {name = "triple_kill", width = 64, height = 64},
-    killtacular = {name = "killtacular", width = 64, height = 64},
-    killingSpree = {name = "killing_spree", width = 64, height = 64},
-    runningRiot = {name = "running_riot", width = 64, height = 64},
-    snapshot = {name = "snapshot_kill", width = 64, height = 64},
-    closeCall = {name = "close_call", width = 64, height = 64},
-    fromTheGrave = {name = "from_the_grave", width = 64, height = 64},
-    rocketKill = {name = "rocket_kill", width = 64, height = 64},
-    supercombine = {name = "needler_kill", width = 64, height = 64},
+    kill = {name = "normal_kill", width = defaultMedalSize, height = defaultMedalSize},
+    doubleKill = {name = "double_kill", width = defaultMedalSize, height = defaultMedalSize},
+    tripleKill = {name = "triple_kill", width = defaultMedalSize, height = defaultMedalSize},
+    killtacular = {name = "killtacular", width = defaultMedalSize, height = defaultMedalSize},
+    killingSpree = {name = "killing_spree", width = defaultMedalSize, height = defaultMedalSize},
+    runningRiot = {name = "running_riot", width = defaultMedalSize, height = defaultMedalSize},
+    snapshot = {name = "snapshot_kill", width = defaultMedalSize, height = defaultMedalSize},
+    closeCall = {name = "close_call", width = defaultMedalSize, height = defaultMedalSize},
+    fromTheGrave = {name = "from_the_grave", width = defaultMedalSize, height = defaultMedalSize},
+    rocketKill = {name = "rocket_kill", width = defaultMedalSize, height = defaultMedalSize},
+    supercombine = {name = "needler_kill", width = defaultMedalSize, height = defaultMedalSize},
     hitmarkerHit = {
         name = "hitmarker",
-        width = 32,
-        height = 32,
+        width = defaultMedalSize,
+        height = defaultMedalSize,
         renderGroup = "crosshair"
     },
     hitmarkerKill = {
         name = "hitmarker_kill",
-        width = 32,
-        height = 32,
+        width = defaultMedalSize,
+        height = defaultMedalSize,
         renderGroup = "crosshair"
     }
 }
@@ -84,7 +90,7 @@ function OnScriptLoad()
 
     -- Fade in animation
     optic.register_animation("fade in", 200)
-    optic.add_animation_target("fade in", "ease in", "position x", 60)
+    optic.add_animation_target("fade in", "ease in", "position x", defaultMedalSize)
     optic.add_animation_target("fade in", "ease in", "opacity", 255)
 
     -- Fade out animation
@@ -93,10 +99,10 @@ function OnScriptLoad()
 
     -- Slide animation
     optic.register_animation("slide", 300)
-    optic.add_animation_target("slide", 0.4, 0.0, 0.6, 1.0, "position x", 60)
+    optic.add_animation_target("slide", 0.4, 0.0, 0.6, 1.0, "position x", defaultMedalSize)
 
     -- Create medals render group
-    optic.create_group("medals", 50, 600, 255, 0, 4000, 0, "fade in", "fade out", "slide")
+    optic.create_group("medals", 50, (screenHeight / 2), 255, 0, 4000, 0, "fade in", "fade out", "slide")
     dprint("Medals loaded!")
 end
 
@@ -107,8 +113,6 @@ local function medal(sprite)
     if (renderGroup) then
         -- TODO Add real alternate render group implementation
         -- Crosshair sprite
-        local screenWidth = read_word(0x637CF2)
-        local screenHeight = read_word(0x637CF0)
         optic.render_sprite(sprite.name, (screenWidth - sprites.hitmarkerHit.width) / 2,
                             (screenHeight - sprites.hitmarkerHit.height) / 2, 255, 0, 200)
 
@@ -191,5 +195,20 @@ end
 
 harmony.set_callback("multiplayer sound", "OnMultiplayerSound")
 harmony.set_callback("multiplayer event", "OnMultiplayerEvent")
+
+function OnCommand(command)
+    if (command == "otest") then
+        for i = 1,5 do
+            medal(sprites.kill)
+        end
+        medal(sprites.hitmarkerHit)
+        return false
+    elseif (command == "odebug") then
+        debugMode = not debugMode
+        return false
+    end
+end
+
+set_callback("command", "OnCommand")
 
 OnScriptLoad()
