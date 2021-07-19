@@ -1,7 +1,7 @@
 
 <html>
     <p align="center">
-        <img width="450px" src="img/optic-logo.png"/>
+        <img width="250px" src="img/optic-logo.png"/>
     </p>
     <h1 align="center">Optic <b>1.0.0</b></h1>
     <p align="center">
