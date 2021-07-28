@@ -31,13 +31,14 @@ local events = {
 }
 local currentStyle = "h4"
 local imagesPath = "%s/images/%s.png"
---local defaultMedalSize = 70
+-- local defaultMedalSize = 70
 local playerData = {deaths = 0, kills = 0, noKillSinceDead = false}
 local screenWidth = read_word(0x637CF2)
 local screenHeight = read_word(0x637CF0)
 -- FIXME There should be a better way to scale this, I just did simple math to obtain this value
---local defaultMedalSize = (screenHeight * 0.065) - 1
+-- local defaultMedalSize = (screenHeight * 0.065) - 1
 local defaultMedalSize = (screenHeight / 15) - 1
+local medalsLoaded = false
 
 ---@class sprite
 ---@field name string Name of the image file name of the sprite
@@ -56,6 +57,7 @@ local sprites = {
     snapshot = {name = "snapshot_kill", width = defaultMedalSize, height = defaultMedalSize},
     closeCall = {name = "close_call", width = defaultMedalSize, height = defaultMedalSize},
     fromTheGrave = {name = "from_the_grave", width = defaultMedalSize, height = defaultMedalSize},
+    firstStrike = {name = "first_strike", width = defaultMedalSize , height = defaultMedalSize},
     rocketKill = {name = "rocket_kill", width = defaultMedalSize, height = defaultMedalSize},
     supercombine = {name = "needler_kill", width = defaultMedalSize, height = defaultMedalSize},
     hitmarkerHit = {
@@ -83,8 +85,7 @@ function OnScriptLoad()
     for event, sprite in pairs(sprites) do
         if (sprite.name) then
             dprint("Loading sprite: " .. sprite.name)
-            optic.register_sprite(sprite.name, image(sprite.name), sprite.width,
-                                  sprite.height)
+            optic.register_sprite(sprite.name, image(sprite.name), sprite.width, sprite.height)
         end
     end
 
@@ -102,22 +103,33 @@ function OnScriptLoad()
     optic.add_animation_target("slide", 0.4, 0.0, 0.6, 1.0, "position x", defaultMedalSize)
 
     -- Create medals render group
-    optic.create_group("medals", 50, (screenHeight / 2), 255, 0, 4000, 0, "fade in", "fade out", "slide")
+    optic.create_group("medals", 50, (screenHeight / 2), 255, 0, 4000, 0, "fade in", "fade out",
+                       "slide")
+    medalsLoaded = true
+
+    -- Load medals callback
+    harmony.set_callback("multiplayer sound", "OnMultiplayerSound")
+    harmony.set_callback("multiplayer event", "OnMultiplayerEvent")
+
     dprint("Medals loaded!")
 end
 
 ---@param sprite sprite
 local function medal(sprite)
-    medalsQueue[#medalsQueue + 1] = sprite.name
-    local renderGroup = sprite.renderGroup
-    if (renderGroup) then
-        -- TODO Add real alternate render group implementation
-        -- Crosshair sprite
-        optic.render_sprite(sprite.name, (screenWidth - sprites.hitmarkerHit.width) / 2,
-                            (screenHeight - sprites.hitmarkerHit.height) / 2, 255, 0, 200)
+    if (medalsLoaded) then
+        medalsQueue[#medalsQueue + 1] = sprite.name
+        local renderGroup = sprite.renderGroup
+        if (renderGroup) then
+            -- TODO Add real alternate render group implementation
+            -- Crosshair sprite
+            optic.render_sprite(sprite.name, (screenWidth - sprites.hitmarkerHit.width) / 2,
+                                (screenHeight - sprites.hitmarkerHit.height) / 2, 255, 0, 200)
 
+        else
+            optic.render_sprite("medals", sprite.name)
+        end
     else
-        optic.render_sprite("medals", sprite.name)
+        console_out("Error, medals were not loaded properly!")
     end
 end
 
@@ -169,6 +181,18 @@ function OnMultiplayerEvent(eventName, localId, killerId, victimId)
                     end
                 end
             end
+            local localPlayer = blam.player(get_player())
+            dprint(localPlayer)
+            local allServerKills = 0
+            for playerIndex = 0,15 do
+                local playerData = blam.player(get_player(playerIndex))
+                if (playerData and playerData.kills > 0 and playerData.index ~= localPlayer.index) then
+                    allServerKills = allServerKills + playerData.kills
+                end
+            end
+            if (allServerKills == 0 and localPlayer.kills == 1) then
+                medal(sprites.firstStrike)
+            end
             if (player.health <= 0.25) then
                 medal(sprites.closeCall)
             end
@@ -193,14 +217,12 @@ function OnMultiplayerEvent(eventName, localId, killerId, victimId)
     end
 end
 
-harmony.set_callback("multiplayer sound", "OnMultiplayerSound")
-harmony.set_callback("multiplayer event", "OnMultiplayerEvent")
-
 function OnCommand(command)
     if (command == "otest") then
-        for i = 1,5 do
-            medal(sprites.kill)
-        end
+        medal(sprites.kill)
+        medal(sprites.runningRiot)
+        medal(sprites.closeCall)
+        medal(sprites.killtacular)
         medal(sprites.hitmarkerHit)
         return false
     elseif (command == "odebug") then
@@ -209,6 +231,13 @@ function OnCommand(command)
     end
 end
 
+function OnMapLoad()
+    if (not medalsLoaded) then
+        console_out("Error, medals were not loaded properly!")
+    end
+end
+
 set_callback("command", "OnCommand")
+set_callback("map load", "OnMapLoad")
 
 OnScriptLoad()

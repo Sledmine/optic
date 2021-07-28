@@ -42,6 +42,7 @@ standard for medals available to recreate on Halo Custom Edition.
 - Rocket Kill
 - Needler Kill
 - Close Call
+- First Strike
 
 Also this project provides simple hitmaker support.
 
