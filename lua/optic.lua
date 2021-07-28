@@ -6,6 +6,7 @@ local optic = harmony.optic
 local blam = require "blam"
 
 local debugMode = false
+local opticVersion = "1.1.0"
 local medalsQueue = {}
 
 local function dprint(message)
@@ -228,6 +229,8 @@ function OnCommand(command)
     elseif (command == "odebug") then
         debugMode = not debugMode
         return false
+    elseif(command == "oversion") then
+        console_out(opticVersion)
     end
 end
 
