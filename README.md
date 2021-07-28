@@ -3,7 +3,7 @@
     <p align="center">
         <img width="250px" src="img/optic-logo.png"/>
     </p>
-    <h1 align="center">Optic <b>1.0.0</b></h1>
+    <h1 align="center">Optic <b>1.1.0</b></h1>
     <p align="center">
         Optic medals for Halo Custom Edition using Harmony
     </p>
