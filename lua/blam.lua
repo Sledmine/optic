@@ -814,7 +814,7 @@ local dataBindingMetaTable = {
         else
             local errorMessage = "Unable to write an invalid property ('" .. property ..
                                      "')"
-            consoleOutput(debug.traceback(errorMessage, 2), consoleColors.error)
+            error(debug.traceback(errorMessage, 2))
         end
     end,
     __index = function(object, property)
@@ -827,7 +827,7 @@ local dataBindingMetaTable = {
         else
             local errorMessage = "Unable to read an invalid property ('" .. property ..
                                      "')"
-            consoleOutput(debug.traceback(errorMessage, 2), consoleColors.error)
+            error(debug.traceback(errorMessage, 2))
         end
     end
 }
@@ -1590,6 +1590,7 @@ local projectileStructure = extendStructure(objectStructure, {
 ---@field index number Local index of this player (0-15
 ---@field speed number Current speed of this player
 ---@field ping number Ping amount from server of this player in milliseconds
+---@field kills number Kills quantity done by this player
 
 local playerStructure = {
     id = {type = "word", offset = 0x0},
@@ -1600,8 +1601,12 @@ local playerStructure = {
     color = {type = "word", offset = 0x60},
     index = {type = "byte", offset = 0x67},
     speed = {type = "float", offset = 0x6C},
-    ping = {type = "dword", offset = 0xDC}
+    ping = {type = "dword", offset = 0xDC},
+    kills = {type = "word", offset = 0x9C}
 }
+
+---@class firstPersonInterface number
+---@field firstPersonHands number
 
 ---@class multiplayerInformation
 ---@field flag number Tag ID of the flag object used for multiplayer games
@@ -1609,9 +1614,9 @@ local playerStructure = {
 
 ---@class globalsTag
 ---@field multiplayerInformation multiplayerInformation[]
+---@field firstPersonInterface firstPersonInterface[]
 
 local globalsTagStructure = {
-    -- WARNING Separeted properties for easier accesibility, structure is an array of properties
     multiplayerInformation = {
         type = "table",
         jump = 0x0,
@@ -1620,15 +1625,19 @@ local globalsTagStructure = {
             flag = {type = "dword", offset = 0xC},
             unit = {type = "dword", offset = 0x1C}
         }
+    },
+    firstPersonInterface = {
+        type = "table",
+        jump = 0x0,
+        offset = 0x180,
+        rows = {firstPersonHands = {type = "dword", offset = 0xC}}
     }
 }
 
 ---@class firstPerson
 ---@field weaponObjectId number Weapon Id from the first person view
 
-local firstPersonStructure = {
-    weaponObjectId = {type = "dword", offset = 0x10}
-}
+local firstPersonStructure = {weaponObjectId = {type = "dword", offset = 0x10}}
 
 ------------------------------------------------------------------------------
 -- LuaBlam globals
@@ -1779,6 +1788,7 @@ function blam.getTag(tagIdOrTagPath, tagClass, ...)
 end
 
 --- Create a player object given player entry table address
+---@return player
 function blam.player(address)
     if (isValid(address)) then
         return createObject(address, playerStructure)
