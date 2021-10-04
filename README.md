@@ -3,7 +3,7 @@
     <p align="center">
         <img width="250px" src="img/optic-logo.png"/>
     </p>
-    <h1 align="center">Optic <b>1.1.0</b></h1>
+    <h1 align="center">Optic <b>1.1.1</b></h1>
     <p align="center">
         Optic medals for Halo Custom Edition using Harmony
     </p>
@@ -62,8 +62,7 @@ This optic project uses lua-blam as a tool to determine different events happeni
 if the map you are playing is "protected" lua-blam will have some problems at getting the required
 information from the game memory resulting in some medals not being able to be triggered.
 
-## Why is there no sound or HUD text on some medals?
-Halo has internal sounds for some game events by default, playing custom external sounds is not
-supported on harmony-0.1.0 (current version for optic-1.0.0), Jerry is working on providing a way to
-play sounds easily on harmony-0.2.0. HUD text for medals is easier than adding sound,
-I'll add medals HUD text on a next release.
+## Why is there no sound on some medals?
+Halo has internal sounds for some game events by default, playing custom external sounds is coming
+thanks to harmony-1.0.0 (current dependency for optic), Jerry is working on finishing some changes
+to the sounds API, so sounds will come soon!
