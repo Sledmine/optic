@@ -4,13 +4,14 @@ clua_version = 2.056
 harmony = require "mods.harmony"
 local optic = harmony.optic
 local blam = require "blam"
+--local glue = require "glue"
 
-local debugMode = false
+local DebugMode = false
 local opticVersion = "1.1.0"
 local medalsQueue = {}
 
 local function dprint(message)
-    if (debugMode) then
+    if (DebugMode) then
         console_out(message)
     end
 end
@@ -28,10 +29,12 @@ local events = {
     ctfEnemyScore = "ctf enemy score",
     ctfAllyScore = "ctf ally score",
     ctfEnemyStoleFlag = "ctf enemy stole flag",
+    localCtfScore = "local ctf score",
     hitmarker = "ting"
 }
 local currentStyle = "h4"
 local imagesPath = "%s/images/%s.png"
+local soundsPath = "%s/sounds/%s.mp3"
 -- local defaultMedalSize = 70
 local playerData = {deaths = 0, kills = 0, noKillSinceDead = false}
 local screenWidth = read_word(0x637CF2)
@@ -65,28 +68,46 @@ local sprites = {
         name = "hitmarker",
         width = defaultMedalSize,
         height = defaultMedalSize,
-        renderGroup = "crosshair"
+        renderGroup = "crosshair",
+        noHudMessage = true,
     },
     hitmarkerKill = {
         name = "hitmarker_kill",
         width = defaultMedalSize,
         height = defaultMedalSize,
-        renderGroup = "crosshair"
+        renderGroup = "crosshair",
+        noHudMessage = true,
     }
 }
 
 --- Create and format paths for sprite images
--- This is helpful to avoid hardcoding sprite absolute paths
+--- This is helpful to avoid hardcoding sprite absolute paths
 local function image(spriteName)
     return imagesPath:format(currentStyle, spriteName)
+end
+
+--- Create and format paths for sprite images
+-- This is helpful to avoid hardcoding sprite absolute paths
+local function audio(spriteName)
+    return soundsPath:format(currentStyle, spriteName)
 end
 
 function OnScriptLoad()
     -- Create sprites
     for event, sprite in pairs(sprites) do
         if (sprite.name) then
+            local medalImage = image(sprite.name)
+            local medalSound = audio(sprite.name)
             dprint("Loading sprite: " .. sprite.name)
-            optic.register_sprite(sprite.name, image(sprite.name), sprite.width, sprite.height)
+            dprint("Image: " .. medalImage)
+            if (file_exists(audio(sprite.name))) then
+                dprint("Sound: " .. medalSound)
+                --optic.register_sprite(sprite.name, medalImage, sprite.width, sprite.height, medalSound)
+                optic.register_sprite(sprite.name, medalImage, sprite.width, sprite.height)
+            else
+                dprint("Warning, there is no sound for this sprite!w")
+                optic.register_sprite(sprite.name, medalImage, sprite.width, sprite.height)
+            end
         end
     end
 
@@ -115,6 +136,12 @@ function OnScriptLoad()
     dprint("Medals loaded!")
 end
 
+--- Normalize any map name or snake case name to a name with sentence case
+---@param name string
+local function toSentenceCase(name)
+    return string.gsub(" " .. name:gsub("_", " "), "%W%l", string.upper):sub(2)
+end
+
 ---@param sprite sprite
 local function medal(sprite)
     if (medalsLoaded) then
@@ -129,6 +156,9 @@ local function medal(sprite)
         else
             optic.render_sprite("medals", sprite.name)
         end
+        if (not sprite.name:find("hitmarker")) then
+            hud_message(toSentenceCase(sprite.name))
+        end
     else
         console_out("Error, medals were not loaded properly!")
     end
@@ -139,7 +169,10 @@ function OnMultiplayerSound(soundEventName)
     if (soundEventName == events.hitmarker) then
         medal(sprites.hitmarkerHit)
     end
-    -- return true
+    if (soundEventName:find("kill") or soundEventName:find("running")) then
+        dprint("Cancelling sound...")
+        return false
+    end
 end
 
 local function isPreviousMedalKillVariation()
@@ -187,10 +220,11 @@ function OnMultiplayerEvent(eventName, localId, killerId, victimId)
             local allServerKills = 0
             for playerIndex = 0,15 do
                 local playerData = blam.player(get_player(playerIndex))
-                if (playerData and playerData.kills > 0 and playerData.index ~= localPlayer.index) then
+                if (playerData and playerData.index ~= localPlayer.index) then
                     allServerKills = allServerKills + playerData.kills
                 end
             end
+            dprint("All server kills: ".. allServerKills)
             if (allServerKills == 0 and localPlayer.kills == 1) then
                 medal(sprites.firstStrike)
             end
@@ -220,14 +254,14 @@ end
 
 function OnCommand(command)
     if (command == "otest") then
-        medal(sprites.kill)
+        medal(sprites.firstStrike)
         medal(sprites.runningRiot)
         medal(sprites.closeCall)
         medal(sprites.killtacular)
         medal(sprites.hitmarkerHit)
         return false
     elseif (command == "odebug") then
-        debugMode = not debugMode
+        DebugMode = not DebugMode
         return false
     elseif(command == "oversion") then
         console_out(opticVersion)
@@ -240,7 +274,12 @@ function OnMapLoad()
     end
 end
 
+function OnUnload()
+    harmony.unload()
+end
+
 set_callback("command", "OnCommand")
 set_callback("map load", "OnMapLoad")
+set_callback("unload", "OnUnload")
 
 OnScriptLoad()
