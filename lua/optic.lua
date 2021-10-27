@@ -124,11 +124,11 @@ function OnScriptLoad()
     optic.create_animation("slide", 300)
     optic.set_animation_property("slide", 0.4, 0.0, 0.6, 1.0, "position x", defaultMedalSize)
 
-    -- Create medals render group
+    -- Create sprites render queue
     optic.create_render_queue("medals", 50, (screenHeight / 2), 255, 0, 4000, 0, "fade in", "fade out",
                        "slide")
 
-    -- Create audio render group
+    -- Create audio engine instance
     --optic.create_audio_engine("medals")
 
     medalsLoaded = true
