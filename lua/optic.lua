@@ -1,7 +1,7 @@
 clua_version = 2.056
 
 -- Modules
-harmony = require "mods.harmony"
+local harmony = require "mods.harmony"
 local optic = harmony.optic
 local blam = require "blam"
 --local glue = require "glue"
@@ -102,31 +102,35 @@ function OnScriptLoad()
             dprint("Image: " .. medalImage)
             if (file_exists(audio(sprite.name))) then
                 dprint("Sound: " .. medalSound)
-                --optic.register_sprite(sprite.name, medalImage, sprite.width, sprite.height, medalSound)
-                optic.register_sprite(sprite.name, medalImage, sprite.width, sprite.height)
+                optic.create_sprite(sprite.name, medalImage, sprite.width, sprite.height)
+                --optic.create_sound(sprite.name, medalSound)
             else
                 dprint("Warning, there is no sound for this sprite!w")
-                optic.register_sprite(sprite.name, medalImage, sprite.width, sprite.height)
+                optic.create_sprite(sprite.name, medalImage, sprite.width, sprite.height)
             end
         end
     end
 
     -- Fade in animation
-    optic.register_animation("fade in", 200)
-    optic.add_animation_target("fade in", "ease in", "position x", defaultMedalSize)
-    optic.add_animation_target("fade in", "ease in", "opacity", 255)
+    optic.create_animation("fade in", 200)
+    optic.set_animation_property("fade in", "ease in", "position x", defaultMedalSize)
+    optic.set_animation_property("fade in", "ease in", "opacity", 255)
 
     -- Fade out animation
-    optic.register_animation("fade out", 200)
-    optic.add_animation_target("fade out", "ease out", "opacity", -255)
+    optic.create_animation("fade out", 200)
+    optic.set_animation_property("fade out", "ease out", "opacity", -255)
 
     -- Slide animation
-    optic.register_animation("slide", 300)
-    optic.add_animation_target("slide", 0.4, 0.0, 0.6, 1.0, "position x", defaultMedalSize)
+    optic.create_animation("slide", 300)
+    optic.set_animation_property("slide", 0.4, 0.0, 0.6, 1.0, "position x", defaultMedalSize)
 
     -- Create medals render group
-    optic.create_group("medals", 50, (screenHeight / 2), 255, 0, 4000, 0, "fade in", "fade out",
+    optic.create_render_queue("medals", 50, (screenHeight / 2), 255, 0, 4000, 0, "fade in", "fade out",
                        "slide")
+
+    -- Create audio render group
+    --optic.create_audio_engine("medals")
+
     medalsLoaded = true
 
     -- Load medals callback
@@ -148,13 +152,13 @@ local function medal(sprite)
         medalsQueue[#medalsQueue + 1] = sprite.name
         local renderGroup = sprite.renderGroup
         if (renderGroup) then
-            -- TODO Add real alternate render group implementation
             -- Crosshair sprite
             optic.render_sprite(sprite.name, (screenWidth - sprites.hitmarkerHit.width) / 2,
                                 (screenHeight - sprites.hitmarkerHit.height) / 2, 255, 0, 200)
 
         else
-            optic.render_sprite("medals", sprite.name)
+            optic.render_sprite(sprite.name, "medals")
+            --optic.play_sound(sprite.name, "medals")
         end
         if (not sprite.name:find("hitmarker")) then
             hud_message(toSentenceCase(sprite.name))
@@ -274,12 +278,7 @@ function OnMapLoad()
     end
 end
 
-function OnUnload()
-    harmony.unload()
-end
-
 set_callback("command", "OnCommand")
 set_callback("map load", "OnMapLoad")
-set_callback("unload", "OnUnload")
 
 OnScriptLoad()
