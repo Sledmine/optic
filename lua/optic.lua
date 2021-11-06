@@ -4,10 +4,10 @@ clua_version = 2.056
 local harmony = require "mods.harmony"
 local optic = harmony.optic
 local blam = require "blam"
---local glue = require "glue"
+-- local glue = require "glue"
 
 local DebugMode = false
-local opticVersion = "1.1.0"
+local opticVersion = "1.1.3"
 local medalsQueue = {}
 
 local function dprint(message)
@@ -61,7 +61,7 @@ local sprites = {
     snapshot = {name = "snapshot_kill", width = defaultMedalSize, height = defaultMedalSize},
     closeCall = {name = "close_call", width = defaultMedalSize, height = defaultMedalSize},
     fromTheGrave = {name = "from_the_grave", width = defaultMedalSize, height = defaultMedalSize},
-    firstStrike = {name = "first_strike", width = defaultMedalSize , height = defaultMedalSize},
+    firstStrike = {name = "first_strike", width = defaultMedalSize, height = defaultMedalSize},
     rocketKill = {name = "rocket_kill", width = defaultMedalSize, height = defaultMedalSize},
     supercombine = {name = "needler_kill", width = defaultMedalSize, height = defaultMedalSize},
     hitmarkerHit = {
@@ -69,14 +69,14 @@ local sprites = {
         width = defaultMedalSize,
         height = defaultMedalSize,
         renderGroup = "crosshair",
-        noHudMessage = true,
+        noHudMessage = true
     },
     hitmarkerKill = {
         name = "hitmarker_kill",
         width = defaultMedalSize,
         height = defaultMedalSize,
         renderGroup = "crosshair",
-        noHudMessage = true,
+        noHudMessage = true
     }
 }
 
@@ -96,17 +96,18 @@ function OnScriptLoad()
     -- Create sprites
     for event, sprite in pairs(sprites) do
         if (sprite.name) then
-            local medalImage = image(sprite.name)
-            local medalSound = audio(sprite.name)
+            local medalImagePath = image(sprite.name)
+            local medalSoundPath = audio(sprite.name)
             dprint("Loading sprite: " .. sprite.name)
-            dprint("Image: " .. medalImage)
+            dprint("Image: " .. medalImagePath)
             if (file_exists(audio(sprite.name))) then
-                dprint("Sound: " .. medalSound)
-                optic.create_sprite(sprite.name, medalImage, sprite.width, sprite.height)
-                --optic.create_sound(sprite.name, medalSound)
+                dprint("Sound: " .. medalSoundPath)
+                optic.create_sprite(sprite.name, medalImagePath, sprite.width, sprite.height)
+                --optic.create_sound(sprite.name, medalSoundPath)
+                sprites[event].hasAudio = true
             else
-                dprint("Warning, there is no sound for this sprite!w")
-                optic.create_sprite(sprite.name, medalImage, sprite.width, sprite.height)
+                -- dprint("Warning, there is no sound for this sprite!")
+                optic.create_sprite(sprite.name, medalImagePath, sprite.width, sprite.height)
             end
         end
     end
@@ -125,8 +126,8 @@ function OnScriptLoad()
     optic.set_animation_property("slide", 0.4, 0.0, 0.6, 1.0, "position x", defaultMedalSize)
 
     -- Create sprites render queue
-    optic.create_render_queue("medals", 50, (screenHeight / 2), 255, 0, 4000, 0, "fade in", "fade out",
-                       "slide")
+    optic.create_render_queue("medals", 50, (screenHeight / 2), 255, 0, 4000, 0, "fade in",
+                              "fade out", "slide")
 
     -- Create audio engine instance
     --optic.create_audio_engine("medals")
@@ -158,7 +159,9 @@ local function medal(sprite)
 
         else
             optic.render_sprite(sprite.name, "medals")
-            --optic.play_sound(sprite.name, "medals")
+            if (sprite.hasAudio) then
+                --optic.play_sound(sprite.name, "medals")
+            end
         end
         if (not sprite.name:find("hitmarker")) then
             hud_message(toSentenceCase(sprite.name))
@@ -173,10 +176,11 @@ function OnMultiplayerSound(soundEventName)
     if (soundEventName == events.hitmarker) then
         medal(sprites.hitmarkerHit)
     end
-    if (soundEventName:find("kill") or soundEventName:find("running")) then
-        dprint("Cancelling sound...")
-        return false
-    end
+    --if (soundEventName:find("kill") or soundEventName:find("running")) then
+    --    --dprint("Cancelling sound...")
+    --    --return false
+    --end
+    return true
 end
 
 local function isPreviousMedalKillVariation()
@@ -220,15 +224,14 @@ function OnMultiplayerEvent(eventName, localId, killerId, victimId)
                 end
             end
             local localPlayer = blam.player(get_player())
-            dprint(localPlayer)
             local allServerKills = 0
-            for playerIndex = 0,15 do
+            for playerIndex = 0, 15 do
                 local playerData = blam.player(get_player(playerIndex))
                 if (playerData and playerData.index ~= localPlayer.index) then
                     allServerKills = allServerKills + playerData.kills
                 end
             end
-            dprint("All server kills: ".. allServerKills)
+            dprint("All server kills: " .. allServerKills)
             if (allServerKills == 0 and localPlayer.kills == 1) then
                 medal(sprites.firstStrike)
             end
@@ -267,7 +270,7 @@ function OnCommand(command)
     elseif (command == "odebug") then
         DebugMode = not DebugMode
         return false
-    elseif(command == "oversion") then
+    elseif (command == "oversion") then
         console_out(opticVersion)
     end
 end
