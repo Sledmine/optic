@@ -47,3 +47,4 @@ luac.out
 
 # Distribution
 dist/
+package/
