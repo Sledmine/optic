@@ -3,7 +3,7 @@
     <p align="center">
         <img width="250px" src="img/optic-logo.png"/>
     </p>
-    <h1 align="center">Optic <b>1.1.1</b></h1>
+    <h1 align="center">Optic</h1>
     <p align="center">
         Optic medals for Halo Custom Edition using Harmony
     </p>
@@ -64,5 +64,5 @@ information from the game memory resulting in some medals not being able to be t
 
 ## Why is there no sound on some medals?
 Halo has internal sounds for some game events by default, playing custom external sounds is coming
-thanks to harmony-1.0.0 (current dependency for optic), Jerry is working on finishing some changes
+thanks to harmony>1.0.0 (current dependency for optic), Jerry is working on finishing some changes
 to the sounds API, so sounds will come soon!
