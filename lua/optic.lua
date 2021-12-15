@@ -4,11 +4,17 @@ clua_version = 2.056
 local harmony = require "mods.harmony"
 local optic = harmony.optic
 local blam = require "blam"
+local json = require "json"
 -- local glue = require "glue"
 
 local DebugMode = false
-local opticVersion = "1.1.3"
+local opticVersion = "1.2.3"
 local medalsQueue = {}
+-- Controlled by optic.json config file, do not edit on the script!
+local configuration = {
+    hitmarker = true,
+    hudMessages = true
+}
 
 local function dprint(message)
     if (DebugMode) then
@@ -16,7 +22,18 @@ local function dprint(message)
     end
 end
 
--- Optic data definition
+local function loadOpticConfiguration()
+    dprint("Loading optic configuration...")
+    local opticConfiguration = read_file("optic.json")
+    if (opticConfiguration) then
+        configuration = json.decode(opticConfiguration)
+        dprint("Success, configuration loaded correctly.")
+        return true
+    end
+    dprint("Warning, unable to load optic configuration.")
+    return false
+end
+
 local events = {
     localKilledPlayer = "local killed player",
     localDoubleKill = "local double kill",
@@ -93,6 +110,7 @@ local function audio(spriteName)
 end
 
 function OnScriptLoad()
+    loadOpticConfiguration()
     -- Create sprites
     for event, sprite in pairs(sprites) do
         if (sprite.name) then
@@ -163,8 +181,10 @@ local function medal(sprite)
                 --optic.play_sound(sprite.name, "medals")
             end
         end
-        if (not sprite.name:find("hitmarker")) then
-            hud_message(toSentenceCase(sprite.name))
+        if (configuration.hudMessages) then
+            if (not sprite.name:find("hitmarker")) then
+                hud_message(toSentenceCase(sprite.name))
+            end                
         end
     else
         console_out("Error, medals were not loaded properly!")
@@ -174,7 +194,9 @@ end
 function OnMultiplayerSound(soundEventName)
     dprint("sound: " .. soundEventName)
     if (soundEventName == events.hitmarker) then
-        medal(sprites.hitmarkerHit)
+        if (configuration.hitmarker) then
+            medal(sprites.hitmarkerHit)
+        end
     end
     --if (soundEventName:find("kill") or soundEventName:find("running")) then
     --    --dprint("Cancelling sound...")
@@ -241,7 +263,9 @@ function OnMultiplayerEvent(eventName, localId, killerId, victimId)
             if (not isPreviousMedalKillVariation()) then
                 medal(sprites.kill)
             end
-            medal(sprites.hitmarkerKill)
+            if (configuration.hitmarker) then
+                medal(sprites.hitmarkerKill)
+            end
         else
             dprint("Player is dead!")
             medal(sprites.fromTheGrave)
@@ -260,22 +284,30 @@ function OnMultiplayerEvent(eventName, localId, killerId, victimId)
 end
 
 function OnCommand(command)
-    if (command == "otest") then
+    if (command == "optic_test" or command == "otest") then
         medal(sprites.firstStrike)
         medal(sprites.runningRiot)
         medal(sprites.closeCall)
         medal(sprites.killtacular)
-        medal(sprites.hitmarkerHit)
+        if (configuration.hitmarker) then
+            medal(sprites.hitmarkerHit)
+        end
         return false
-    elseif (command == "odebug") then
+    elseif (command == "optic_debug" or command == "odebug") then
         DebugMode = not DebugMode
+        console_out("Debug Mode: " .. tostring(DebugMode))
         return false
-    elseif (command == "oversion") then
+    elseif (command == "optic_version" or command == "oversion") then
         console_out(opticVersion)
+        return false
+    elseif (command == "optic_reload"  or command == "oreload") then
+        loadOpticConfiguration()
+        return false
     end
 end
 
 function OnMapLoad()
+    loadOpticConfiguration()
     if (not medalsLoaded) then
         console_out("Error, medals were not loaded properly!")
     end
