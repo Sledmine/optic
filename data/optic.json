@@ -1,4 +1,5 @@
 {
     "hitmarker": true,
-    "hudMessages": true
+    "hudMessages": true,
+    "style": "h4"
 }

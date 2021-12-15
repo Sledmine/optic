@@ -13,7 +13,8 @@ local medalsQueue = {}
 -- Controlled by optic.json config file, do not edit on the script!
 local configuration = {
     hitmarker = true,
-    hudMessages = true
+    hudMessages = true,
+    style = "h4"
 }
 
 local function dprint(message)
@@ -49,7 +50,6 @@ local events = {
     localCtfScore = "local ctf score",
     hitmarker = "ting"
 }
-local currentStyle = "h4"
 local imagesPath = "%s/images/%s.png"
 local soundsPath = "%s/sounds/%s.mp3"
 -- local defaultMedalSize = 70
@@ -100,13 +100,13 @@ local sprites = {
 --- Create and format paths for sprite images
 --- This is helpful to avoid hardcoding sprite absolute paths
 local function image(spriteName)
-    return imagesPath:format(currentStyle, spriteName)
+    return imagesPath:format(configuration.style, spriteName)
 end
 
 --- Create and format paths for sprite images
 -- This is helpful to avoid hardcoding sprite absolute paths
 local function audio(spriteName)
-    return soundsPath:format(currentStyle, spriteName)
+    return soundsPath:format(configuration.style, spriteName)
 end
 
 function OnScriptLoad()
