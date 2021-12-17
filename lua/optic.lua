@@ -110,6 +110,7 @@ local function audio(spriteName)
 end
 
 function OnScriptLoad()
+    optic.create_sound("test", "h4/sounds/betrayal.mp3")
     loadOpticConfiguration()
     -- Create sprites
     for event, sprite in pairs(sprites) do
@@ -121,7 +122,7 @@ function OnScriptLoad()
             if (file_exists(audio(sprite.name))) then
                 dprint("Sound: " .. medalSoundPath)
                 optic.create_sprite(sprite.name, medalImagePath, sprite.width, sprite.height)
-                --optic.create_sound(sprite.name, medalSoundPath)
+                optic.create_sound(sprite.name, medalSoundPath)
                 sprites[event].hasAudio = true
             else
                 -- dprint("Warning, there is no sound for this sprite!")
@@ -148,7 +149,7 @@ function OnScriptLoad()
                               "fade out", "slide")
 
     -- Create audio engine instance
-    --optic.create_audio_engine("medals")
+    optic.create_audio_engine("medals")
 
     medalsLoaded = true
 
@@ -178,7 +179,8 @@ local function medal(sprite)
         else
             optic.render_sprite(sprite.name, "medals")
             if (sprite.hasAudio) then
-                --optic.play_sound(sprite.name, "medals")
+                console_out(sprite.name)
+                optic.play_sound(sprite.name, "medals")
             end
         end
         if (configuration.hudMessages) then
