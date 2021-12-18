@@ -8,13 +8,13 @@ local json = require "json"
 -- local glue = require "glue"
 
 local DebugMode = false
-local opticVersion = "1.2.3"
+local opticVersion = "2.0.0"
 local medalsQueue = {}
 -- Controlled by optic.json config file, do not edit on the script!
 local configuration = {
     hitmarker = true,
     hudMessages = true,
-    style = "h4"
+    style = "halo_4"
 }
 
 local function dprint(message)
@@ -23,35 +23,37 @@ local function dprint(message)
     end
 end
 
-local function loadOpticConfiguration()
-    dprint("Loading optic configuration...")
-    local opticConfiguration = read_file("optic.json")
-    if (opticConfiguration) then
-        configuration = json.decode(opticConfiguration)
-        dprint("Success, configuration loaded correctly.")
-        return true
-    end
-    dprint("Warning, unable to load optic configuration.")
-    return false
-end
-
 local events = {
+    fallingDead = "falling dead",
+    guardianKill = "guardianKill",
+    vehicleKill = "vehicle kill",
+    playerKill = "player kill",
+    betrayed = "betrayed",
+    suicide = "suicide",
     localKilledPlayer = "local killed player",
     localDoubleKill = "local double kill",
     localTripleKill = "local triple kill",
     localKilltacular = "local killtacular",
     localKillingSpree = "local killing spree",
     localRunningRiot = "local running riot",
-    vehicleKill = "vehicle kill",
-    playerKill = "player kill",
+    localCtfScore = "local ctf score",
     ctfEnemyScore = "ctf enemy score",
     ctfAllyScore = "ctf ally score",
     ctfEnemyStoleFlag = "ctf enemy stole flag",
-    localCtfScore = "local ctf score",
+    ctfEnemyReturnedFLag = "ctf enemy returned flag",
+    ctfAllyStoleFlag = "ctf ally stole flag",
+    ctfAllyReturnedFlag = "ctf ally returned flag",
+    ctfFriendlyFlagIdleReturned = "ctf friendly flag idle returned",
+    ctfEnemyFlagIdleReturned = "ctf enemy flag idle returned"
+}
+
+local soundsEvents = {
     hitmarker = "ting"
 }
+
 local imagesPath = "%s/images/%s.png"
 local soundsPath = "%s/sounds/%s.mp3"
+local opticStylePath = "%s/style.json"
 -- local defaultMedalSize = 70
 local playerData = {deaths = 0, kills = 0, noKillSinceDead = false}
 local screenWidth = read_word(0x637CF2)
@@ -66,36 +68,7 @@ local medalsLoaded = false
 ---@field width number Width of the sprite image
 ---@field height number Height of sprite image
 ---@field renderGroup string Alternative render group for the sprite, medal group by default
----@field callback string
-
-local sprites = {
-    kill = {name = "normal_kill", width = defaultMedalSize, height = defaultMedalSize},
-    doubleKill = {name = "double_kill", width = defaultMedalSize, height = defaultMedalSize},
-    tripleKill = {name = "triple_kill", width = defaultMedalSize, height = defaultMedalSize},
-    killtacular = {name = "killtacular", width = defaultMedalSize, height = defaultMedalSize},
-    killingSpree = {name = "killing_spree", width = defaultMedalSize, height = defaultMedalSize},
-    runningRiot = {name = "running_riot", width = defaultMedalSize, height = defaultMedalSize},
-    snapshot = {name = "snapshot_kill", width = defaultMedalSize, height = defaultMedalSize},
-    closeCall = {name = "close_call", width = defaultMedalSize, height = defaultMedalSize},
-    fromTheGrave = {name = "from_the_grave", width = defaultMedalSize, height = defaultMedalSize},
-    firstStrike = {name = "first_strike", width = defaultMedalSize, height = defaultMedalSize},
-    rocketKill = {name = "rocket_kill", width = defaultMedalSize, height = defaultMedalSize},
-    supercombine = {name = "needler_kill", width = defaultMedalSize, height = defaultMedalSize},
-    hitmarkerHit = {
-        name = "hitmarker",
-        width = defaultMedalSize,
-        height = defaultMedalSize,
-        renderGroup = "crosshair",
-        noHudMessage = true
-    },
-    hitmarkerKill = {
-        name = "hitmarker_kill",
-        width = defaultMedalSize,
-        height = defaultMedalSize,
-        renderGroup = "crosshair",
-        noHudMessage = true
-    }
-}
+---@field hasAudio boolean
 
 --- Create and format paths for sprite images
 --- This is helpful to avoid hardcoding sprite absolute paths
@@ -109,9 +82,64 @@ local function audio(spriteName)
     return soundsPath:format(configuration.style, spriteName)
 end
 
+local sprites
+
+local function loadOpticStyle()
+    local styleFile = read_file(opticStylePath:format(configuration.style))
+    if (styleFile) then
+        local style = json.decode(styleFile)
+        if (style) then
+            defaultMedalSize = (screenHeight / style.medalSizeFactor) - 1
+        end
+    end
+    console_out("Error, Optic style does not have a style.json file!")
+    return false
+end
+
+local function loadOpticConfiguration()
+    dprint("Loading optic configuration...")
+    local opticConfiguration = read_file("optic.json")
+    if (opticConfiguration) then
+        configuration = json.decode(opticConfiguration)
+        dprint("Success, configuration loaded correctly.")
+        loadOpticStyle()
+        return true
+    end
+    dprint("Warning, unable to load optic configuration.")
+    return false
+end
+
+
 function OnScriptLoad()
-    optic.create_sound("test", "h4/sounds/betrayal.mp3")
     loadOpticConfiguration()
+    sprites = {
+        kill = {name = "normal_kill", width = defaultMedalSize, height = defaultMedalSize},
+        doubleKill = {name = "double_kill", width = defaultMedalSize, height = defaultMedalSize},
+        tripleKill = {name = "triple_kill", width = defaultMedalSize, height = defaultMedalSize},
+        killtacular = {name = "killtacular", width = defaultMedalSize, height = defaultMedalSize},
+        killingSpree = {name = "killing_spree", width = defaultMedalSize, height = defaultMedalSize},
+        runningRiot = {name = "running_riot", width = defaultMedalSize, height = defaultMedalSize},
+        snapshot = {name = "snapshot_kill", width = defaultMedalSize, height = defaultMedalSize},
+        closeCall = {name = "close_call", width = defaultMedalSize, height = defaultMedalSize},
+        fromTheGrave = {name = "from_the_grave", width = defaultMedalSize, height = defaultMedalSize},
+        firstStrike = {name = "first_strike", width = defaultMedalSize, height = defaultMedalSize},
+        rocketKill = {name = "rocket_kill", width = defaultMedalSize, height = defaultMedalSize},
+        supercombine = {name = "needler_kill", width = defaultMedalSize, height = defaultMedalSize},
+        hitmarkerHit = {
+            name = "hitmarker",
+            width = defaultMedalSize,
+            height = defaultMedalSize,
+            renderGroup = "crosshair",
+            noHudMessage = true
+        },
+        hitmarkerKill = {
+            name = "hitmarker_kill",
+            width = defaultMedalSize,
+            height = defaultMedalSize,
+            renderGroup = "crosshair",
+            noHudMessage = true
+        }
+    }
     -- Create sprites
     for event, sprite in pairs(sprites) do
         if (sprite.name) then
@@ -119,14 +147,16 @@ function OnScriptLoad()
             local medalSoundPath = audio(sprite.name)
             dprint("Loading sprite: " .. sprite.name)
             dprint("Image: " .. medalImagePath)
-            if (file_exists(audio(sprite.name))) then
-                dprint("Sound: " .. medalSoundPath)
-                optic.create_sprite(sprite.name, medalImagePath, sprite.width, sprite.height)
-                optic.create_sound(sprite.name, medalSoundPath)
-                sprites[event].hasAudio = true
-            else
-                -- dprint("Warning, there is no sound for this sprite!")
-                optic.create_sprite(sprite.name, medalImagePath, sprite.width, sprite.height)
+            if (file_exists(image(sprite.name))) then
+                if (file_exists(audio(sprite.name))) then
+                    dprint("Sound: " .. medalSoundPath)
+                    optic.create_sprite(sprite.name, medalImagePath, sprite.width, sprite.height)
+                    optic.create_sound(sprite.name, medalSoundPath)
+                    sprites[event].hasAudio = true
+                else
+                    -- dprint("Warning, there is no sound for this sprite!")
+                    optic.create_sprite(sprite.name, medalImagePath, sprite.width, sprite.height)
+                end
             end
         end
     end
@@ -179,7 +209,6 @@ local function medal(sprite)
         else
             optic.render_sprite(sprite.name, "medals")
             if (sprite.hasAudio) then
-                console_out(sprite.name)
                 optic.play_sound(sprite.name, "medals")
             end
         end
@@ -195,15 +224,16 @@ end
 
 function OnMultiplayerSound(soundEventName)
     dprint("sound: " .. soundEventName)
-    if (soundEventName == events.hitmarker) then
+    if (soundEventName == soundsEvents.hitmarker) then
         if (configuration.hitmarker) then
             medal(sprites.hitmarkerHit)
         end
     end
-    --if (soundEventName:find("kill") or soundEventName:find("running")) then
-    --    --dprint("Cancelling sound...")
-    --    --return false
-    --end
+    -- Cancel default sounds that are using medals sounds
+    if (soundEventName:find("kill") or soundEventName:find("running")) then
+        dprint("Cancelling sound...")
+        return false
+    end
     return true
 end
 
@@ -289,7 +319,7 @@ function OnCommand(command)
     if (command == "optic_test" or command == "otest") then
         medal(sprites.firstStrike)
         medal(sprites.runningRiot)
-        medal(sprites.closeCall)
+        medal(sprites.doubleKill)
         medal(sprites.killtacular)
         if (configuration.hitmarker) then
             medal(sprites.hitmarkerHit)

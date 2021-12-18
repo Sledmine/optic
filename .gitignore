@@ -48,3 +48,4 @@ luac.out
 # Distribution
 dist/
 package/
+todo/
