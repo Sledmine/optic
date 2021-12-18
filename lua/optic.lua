@@ -90,6 +90,7 @@ local function loadOpticStyle()
         local style = json.decode(styleFile)
         if (style) then
             defaultMedalSize = (screenHeight / style.medalSizeFactor) - 1
+            return true
         end
     end
     console_out("Error, Optic style does not have a style.json file!")
