@@ -113,19 +113,29 @@ end
 
 function OnScriptLoad()
     loadOpticConfiguration()
+
     sprites = {
+        -- Kill medals
         kill = {name = "normal_kill", width = defaultMedalSize, height = defaultMedalSize},
-        doubleKill = {name = "double_kill", width = defaultMedalSize, height = defaultMedalSize},
-        tripleKill = {name = "triple_kill", width = defaultMedalSize, height = defaultMedalSize},
-        killtacular = {name = "killtacular", width = defaultMedalSize, height = defaultMedalSize},
-        killingSpree = {name = "killing_spree", width = defaultMedalSize, height = defaultMedalSize},
-        runningRiot = {name = "running_riot", width = defaultMedalSize, height = defaultMedalSize},
-        snapshot = {name = "snapshot_kill", width = defaultMedalSize, height = defaultMedalSize},
-        closeCall = {name = "close_call", width = defaultMedalSize, height = defaultMedalSize},
-        fromTheGrave = {name = "from_the_grave", width = defaultMedalSize, height = defaultMedalSize},
-        firstStrike = {name = "first_strike", width = defaultMedalSize, height = defaultMedalSize},
         rocketKill = {name = "rocket_kill", width = defaultMedalSize, height = defaultMedalSize},
         supercombine = {name = "needler_kill", width = defaultMedalSize, height = defaultMedalSize},
+
+        -- Multikills
+        doubleKill = {name = "double_kill", width = defaultMedalSize, height = defaultMedalSize},
+        tripleKill = {name = "triple_kill", width = defaultMedalSize, height = defaultMedalSize},
+        --overkill
+        killtacular = {name = "killtacular", width = defaultMedalSize, height = defaultMedalSize},
+
+        -- Killing sprees
+        killingSpree = {name = "killing_spree", width = defaultMedalSize, height = defaultMedalSize},
+        runningRiot = {name = "running_riot", width = defaultMedalSize, height = defaultMedalSize},
+
+        --Bonus
+        firstStrike = {name = "first_strike", width = defaultMedalSize, height = defaultMedalSize},
+        fromTheGrave = {name = "from_the_grave", width = defaultMedalSize, height = defaultMedalSize},
+        closeCall = {name = "close_call", width = defaultMedalSize, height = defaultMedalSize},
+        snapshot = {name = "snapshot_kill", width = defaultMedalSize, height = defaultMedalSize},
+
         hitmarkerHit = {
             name = "hitmarker",
             width = defaultMedalSize,
@@ -141,6 +151,7 @@ function OnScriptLoad()
             noHudMessage = true
         }
     }
+
     -- Create sprites
     for event, sprite in pairs(sprites) do
         if (sprite.name) then
