@@ -25,7 +25,7 @@ end
 
 local events = {
     fallingDead = "falling dead",
-    guardianKill = "guardianKill",
+    guardianKill = "guardian kill",
     vehicleKill = "vehicle kill",
     playerKill = "player kill",
     betrayed = "betrayed",
@@ -113,6 +113,12 @@ end
 
 function OnScriptLoad()
     loadOpticConfiguration()
+
+    -- Create custom announcer sounds
+    optic.create_sound("suicide", audio("suicide"))
+    optic.create_sound("betrayal", audio("betrayal"))
+
+
     sprites = {
         kill = {name = "normal_kill", width = defaultMedalSize, height = defaultMedalSize},
         doubleKill = {name = "double_kill", width = defaultMedalSize, height = defaultMedalSize},
@@ -223,15 +229,15 @@ local function medal(sprite)
     end
 end
 
-function OnMultiplayerSound(soundEventName)
-    dprint("sound: " .. soundEventName)
-    if (soundEventName == soundsEvents.hitmarker) then
+function OnMultiplayerSound(eventName)
+    dprint("sound: " .. eventName)
+    if (eventName == soundsEvents.hitmarker) then
         if (configuration.hitmarker) then
             medal(sprites.hitmarkerHit)
         end
     end
     -- Cancel default sounds that are using medals sounds
-    if (soundEventName:find("kill") or soundEventName:find("running")) then
+    if (eventName:find("kill") or eventName:find("running")) then
         dprint("Cancelling sound...")
         return false
     end
@@ -313,6 +319,8 @@ function OnMultiplayerEvent(eventName, localId, killerId, victimId)
         medal(sprites.killingSpree)
     elseif (eventName == events.localRunningRiot) then
         medal(sprites.runningRiot)
+    elseif (eventName == events.suicide) then
+        optic.play_sound("suicide", "medals")
     end
 end
 
