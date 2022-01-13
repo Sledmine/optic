@@ -9,7 +9,7 @@ local json = require "json"
 
 local DebugMode = false
 local opticVersion = "2.0.0"
-local medalsQueue = {}
+
 -- Controlled by optic.json config file, do not edit on the script!
 local configuration = {
     hitmarker = true,
@@ -54,7 +54,6 @@ local soundsEvents = {
 local imagesPath = "%s/images/%s.png"
 local soundsPath = "%s/sounds/%s.mp3"
 local opticStylePath = "%s/style.json"
--- local defaultMedalSize = 70
 local playerData = {deaths = 0, kills = 0, noKillSinceDead = false}
 local screenWidth = read_word(0x637CF2)
 local screenHeight = read_word(0x637CF0)
@@ -83,6 +82,8 @@ local function audio(spriteName)
 end
 
 local sprites
+local sounds
+local medalsQueue = {}
 
 local function loadOpticStyle()
     local styleFile = read_file(opticStylePath:format(configuration.style))
@@ -123,18 +124,35 @@ function OnScriptLoad()
         -- Multikills
         doubleKill = {name = "double_kill", width = defaultMedalSize, height = defaultMedalSize},
         tripleKill = {name = "triple_kill", width = defaultMedalSize, height = defaultMedalSize},
-        --overkill
+        overkill = {name = "overkill", width = defaultMedalSize, height = defaultMedalSize},
         killtacular = {name = "killtacular", width = defaultMedalSize, height = defaultMedalSize},
-
+        killtrocity = {name = "killtrocity", width = defaultMedalSize, height = defaultMedalSize},
+        killimanjaro = {name = "killimanjaro", width = defaultMedalSize, height = defaultMedalSize},
+        killtastrophe = {name = "killtastrophe", width = defaultMedalSize, height = defaultMedalSize},
+        killpocalypse = {name = "killpocalypse", width = defaultMedalSize, height = defaultMedalSize},
+        killionaire = {name = "killionaire", width = defaultMedalSize, height = defaultMedalSize},
+        
         -- Killing sprees
         killingSpree = {name = "killing_spree", width = defaultMedalSize, height = defaultMedalSize},
+        killingFrenzy = {name = "killing_frenzy", width = defaultMedalSize, height = defaultMedalSize},
         runningRiot = {name = "running_riot", width = defaultMedalSize, height = defaultMedalSize},
+        rampage = {name = "rampage", width = defaultMedalSize, height = defaultMedalSize},
+        untouchable = {name = "untouchable", width = defaultMedalSize, height = defaultMedalSize},
+        invincible = {name = "invincible", width = defaultMedalSize, height = defaultMedalSize},
+        inconceivable = {name = "inconceivable", width = defaultMedalSize, height = defaultMedalSize},
+        unfriggenbelievable = {name = "unfriggenbelievable", width = defaultMedalSize, height = defaultMedalSize},
+        comebackKill = {name = "comeback_kill", width = defaultMedalSize, height = defaultMedalSize},
 
         --Bonus
         firstStrike = {name = "first_strike", width = defaultMedalSize, height = defaultMedalSize},
         fromTheGrave = {name = "from_the_grave", width = defaultMedalSize, height = defaultMedalSize},
         closeCall = {name = "close_call", width = defaultMedalSize, height = defaultMedalSize},
         snapshot = {name = "snapshot_kill", width = defaultMedalSize, height = defaultMedalSize},
+
+        -- CTF
+        flagCapture = {name = "flag_capture", width = defaultMedalSize, height = defaultMedalSize},
+        flagRunner = {name = "flag_runner", width = defaultMedalSize, height = defaultMedalSize},
+        flagChampion = {name = "flag_champion", width = defaultMedalSize, height = defaultMedalSize},
 
         hitmarkerHit = {
             name = "hitmarker",
@@ -152,6 +170,11 @@ function OnScriptLoad()
         }
     }
 
+    sounds = {
+        suicide = {name = "suicide"},
+        betrayal = {name = "betrayal"}
+    }
+
     -- Create sprites
     for event, sprite in pairs(sprites) do
         if (sprite.name) then
@@ -159,8 +182,8 @@ function OnScriptLoad()
             local medalSoundPath = audio(sprite.name)
             dprint("Loading sprite: " .. sprite.name)
             dprint("Image: " .. medalImagePath)
-            if (file_exists(image(sprite.name))) then
-                if (file_exists(audio(sprite.name))) then
+            if (file_exists(medalImagePath)) then
+                if (file_exists(medalSoundPath)) then
                     dprint("Sound: " .. medalSoundPath)
                     optic.create_sprite(sprite.name, medalImagePath, sprite.width, sprite.height)
                     optic.create_sound(sprite.name, medalSoundPath)
@@ -169,6 +192,17 @@ function OnScriptLoad()
                     -- dprint("Warning, there is no sound for this sprite!")
                     optic.create_sprite(sprite.name, medalImagePath, sprite.width, sprite.height)
                 end
+            end
+        end
+    end
+
+    for event, sound in pairs(sounds) do
+        if (sound.name) then
+            local medalSoundPath = audio(sound.name)
+            dprint("Loading sound: " .. sound.name)
+            dprint("Sound: " .. medalSoundPath)
+            if (file_exists(medalSoundPath)) then
+                optic.create_sound(sound.name, medalSoundPath)
             end
         end
     end
@@ -234,6 +268,10 @@ local function medal(sprite)
     end
 end
 
+local function sound(sound) 
+    optic.play_sound(sound.name, "medals")
+end
+
 function OnMultiplayerSound(soundEventName)
     dprint("sound: " .. soundEventName)
     if (soundEventName == soundsEvents.hitmarker) then
@@ -258,11 +296,18 @@ local function isPreviousMedalKillVariation()
     return false
 end
 
+local killingSpreeCount = 0
+local dyingSpreeCount = 0
+local multikillCount = 0
+local multikillTimestamp = nil
+local flagCaptures = 0
+
 function OnMultiplayerEvent(eventName, localId, killerId, victimId)
     dprint("event: " .. eventName)
     dprint("localId: " .. tostring(localId))
     dprint("killerId: " .. tostring(killerId))
     dprint("victimId: " .. tostring(victimId))
+    
     if (eventName == events.localKilledPlayer) then
         local player = blam.biped(get_dynamic_player())
         local victim = blam.biped(victimId)
@@ -310,20 +355,105 @@ function OnMultiplayerEvent(eventName, localId, killerId, victimId)
             if (configuration.hitmarker) then
                 medal(sprites.hitmarkerKill)
             end
+
+            -- Bump up killing spree count
+            if (localId == killerId) then
+                killingSpreeCount = killingSpreeCount + 1
+        
+                -- Killing spree medals
+                if (killingSpreeCount == 5) then
+                    medal(sprites.killingSpree)
+                elseif (killingSpreeCount == 10) then
+                    medal(sprites.killingFrenzy)
+                elseif (killingSpreeCount == 15) then
+                    medal(sprites.runningRiot)
+                elseif (killingSpreeCount == 20) then
+                    medal(sprites.rampage)
+                elseif (killingSpreeCount == 25) then
+                    medal(sprites.untouchable)
+                elseif (killingSpreeCount == 30) then
+                    medal(sprites.invincible)
+                elseif (killingSpreeCount == 35) then
+                    medal(sprites.inconceivable)
+                elseif (killingSpreeCount == 40) then
+                    medal(sprites.unfriggenbelievable)
+                end
+        
+                -- Comeback kill medal
+                if (dyingSpreeCount <= -3) then
+                    dyingSpreeCount = 0
+                    medal(sprites.comebackKill)
+                end
+        
+                -- Multikill medals
+                if (multikillTimestamp == nil) then
+                    multikillTimestamp = os.time()
+                    multikillCount = 1
+                else
+                    multikillCount = multikillCount + 1
+        
+                    -- Check if the 4.5 seconds have already elapsed
+                    local time = os.time() - multikillTimestamp
+                    if(time < 4.5) then
+                        if (multikillCount == 2) then
+                            medal(sprites.doubleKill)
+                        elseif (multikillCount == 3) then
+                            medal(sprites.tripleKill)
+                        elseif (multikillCount == 4) then
+                            medal(sprites.overkill)
+                        elseif (multikillCount == 5) then
+                            medal(sprites.killtacular)
+                        elseif (multikillCount == 6) then
+                            medal(sprites.killtrocity)
+                        elseif (multikillCount == 7) then
+                            medal(sprites.killimanjaro)
+                        elseif (multikillCount == 8) then
+                            medal(sprites.killtastrophe)
+                        elseif (multikillCount == 9) then
+                            medal(sprites.killpocalypse)
+                        elseif (multikillCount == 10) then
+                            medal(sprites.killionaire)
+                        end
+                    else
+                        multikillCount = 0
+                        multikillTimestamp = nil
+                    end
+                end
+            end
+            
+            -- Count player dead
+            if (localId == victimId) then
+                killingSpreeCount = 0
+                dyingSpreeCount = dyingSpreeCount - 1
+                multikillCount = 0
+                multikillTimestamp = nil
+            end
         else
             dprint("Player is dead!")
             medal(sprites.fromTheGrave)
         end
-    elseif (eventName == events.localDoubleKill) then
-        medal(sprites.doubleKill)
-    elseif (eventName == events.localTripleKill) then
-        medal(sprites.tripleKill)
-    elseif (eventName == events.localKilltacular) then
-        medal(sprites.killtacular)
-    elseif (eventName == events.localKillingSpree) then
-        medal(sprites.killingSpree)
-    elseif (eventName == events.localRunningRiot) then
-        medal(sprites.runningRiot)
+    end
+
+    -- CTF medals
+    if (eventName == events.localCtfScore) then
+        flagCaptures = flagCaptures + 1
+        medal(sprites.flagCapture)
+
+        if (flagCaptures == 2) then
+            medal(sprites.flagRunner)
+        elseif (flagCaptures == 3) then
+            medal(sprites.flagChampion) 
+        end
+    end
+
+    -- Suicide sound
+    if (eventName == events.suicide and localId == victimId) then
+        sound(sounds.suicide)
+    end
+
+    -- Betrayal sound
+    if (eventName == events.betrayed and localId == victimId) then
+        sound(sounds.betrayal)
     end
 end
 
@@ -355,6 +485,13 @@ function OnMapLoad()
     if (not medalsLoaded) then
         console_out("Error, medals were not loaded properly!")
     end
+
+    -- Reset counts
+    killingSpreeCount = 0
+    dyingSpreeCount = 0
+    multikillCount = 0
+    multikillTimestamp = nil
+    flagCaptures = 0
 end
 
 set_callback("command", "OnCommand")
