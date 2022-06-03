@@ -49,3 +49,4 @@ luac.out
 dist/
 package/
 todo/
+optic.json

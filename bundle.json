@@ -1,13 +1,16 @@
 {
     "target": "lua53",
     "output": "dist/optic.lua",
-    "main": "optic",
+    "main": "lua/optic/optic",
     "name": "Optic",
     "include": [
-        "lua/"
+        "lua/",
+        "lua/lua_modules"
     ],
     "modules": [
         "blam",
-        "json"
+        "json",
+        "glue",
+        "optic.sprites"
     ]
 }
