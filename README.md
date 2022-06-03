@@ -7,7 +7,6 @@
     <p align="center">
         Optic medals for Halo Custom Edition using Harmony
     </p>
-    
 </html>
 
 # Description
@@ -66,3 +65,17 @@ information from the game memory resulting in some medals not being able to be t
 Halo has internal sounds for some game events by default, playing custom external sounds is coming
 thanks to harmony>1.0.0 (current dependency for optic), Jerry is working on finishing some changes
 to the sounds API, so sounds will come soon!
+
+## Why some medals does not have an announcer sound?
+As we are attempting to provide a set of standard medals for Halo Custom Edition independent of the
+style you want to see in game, some of the medals were renamed or redisgned to appear in other
+medals style or ported to work in a style were those medals originally were not there, so it
+is a mod decision to remove some aspects from specific medals aspects to make them work across
+styles.
+
+# Medals Adjustments
+
+- Halo 4 -> Super Combine -> Needler Kill
+- Halo Infinite -> Breacher -> Needler Kill
+- Halo Infinite -> First Strike (redisigned cause it does not exist originally)
+- 
