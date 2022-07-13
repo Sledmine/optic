@@ -1,54 +1,59 @@
-local function sprites(defaultMedalSize)
+local function sprites(size)
     return {
         -- Kill medals
-        kill = {name = "normal_kill", width = defaultMedalSize, height = defaultMedalSize},
-        rocketKill = {name = "rocket_kill", width = defaultMedalSize, height = defaultMedalSize},
-        supercombine = {name = "needler_kill", width = defaultMedalSize, height = defaultMedalSize},
-    
+        kill = {name = "normal_kill", width = size, height = size},
+        rocketKill = {name = "rocket_kill", width = size, height = size},
+        supercombine = {name = "needler_kill", width = size, height = size},
+
         -- Multikills
-        doubleKill = {name = "double_kill", width = defaultMedalSize, height = defaultMedalSize},
-        tripleKill = {name = "triple_kill", width = defaultMedalSize, height = defaultMedalSize},
-        overkill = {name = "overkill", width = defaultMedalSize, height = defaultMedalSize},
-        killtacular = {name = "killtacular", width = defaultMedalSize, height = defaultMedalSize},
-        killtrocity = {name = "killtrocity", width = defaultMedalSize, height = defaultMedalSize},
-        killaminjaro = {name = "killaminjaro", width = defaultMedalSize, height = defaultMedalSize},
-        killtastrophe = {name = "killtastrophe", width = defaultMedalSize, height = defaultMedalSize},
-        killpocalypse = {name = "killpocalypse", width = defaultMedalSize, height = defaultMedalSize},
-        killionaire = {name = "killionaire", width = defaultMedalSize, height = defaultMedalSize},
-        
+        doubleKill = {name = "double_kill", width = size, height = size},
+        tripleKill = {name = "triple_kill", width = size, height = size},
+        overkill = {name = "overkill", width = size, height = size},
+        killtacular = {name = "killtacular", width = size, height = size},
+        killtrocity = {name = "killtrocity", width = size, height = size},
+        killaminjaro = {name = "killaminjaro", width = size, height = size},
+        killtastrophe = {name = "killtastrophe", width = size, height = size},
+        killpocalypse = {name = "killpocalypse", width = size, height = size},
+        killionaire = {name = "killionaire", width = size, height = size},
+
         -- Killing sprees
-        killingSpree = {name = "killing_spree", width = defaultMedalSize, height = defaultMedalSize},
-        killingFrenzy = {name = "killing_frenzy", width = defaultMedalSize, height = defaultMedalSize},
-        runningRiot = {name = "running_riot", width = defaultMedalSize, height = defaultMedalSize},
-        rampage = {name = "rampage", width = defaultMedalSize, height = defaultMedalSize},
-        untouchable = {name = "untouchable", width = defaultMedalSize, height = defaultMedalSize},
-        invincible = {name = "invincible", width = defaultMedalSize, height = defaultMedalSize},
-        inconceivable = {name = "inconceivable", width = defaultMedalSize, height = defaultMedalSize},
-        unfriggenbelievable = {name = "unfriggenbelievable", width = defaultMedalSize, height = defaultMedalSize},
-        comebackKill = {name = "comeback_kill", width = defaultMedalSize, height = defaultMedalSize},
-    
-        --Bonus
-        firstStrike = {name = "first_strike", width = defaultMedalSize, height = defaultMedalSize},
-        fromTheGrave = {name = "from_the_grave", width = defaultMedalSize, height = defaultMedalSize},
-        closeCall = {name = "close_call", width = defaultMedalSize, height = defaultMedalSize},
-        snapshot = {name = "snapshot_kill", width = defaultMedalSize, height = defaultMedalSize},
-    
+        killingSpree = {name = "killing_spree", width = size, height = size},
+        killingFrenzy = {name = "killing_frenzy", width = size, height = size},
+        runningRiot = {name = "running_riot", width = size, height = size},
+        rampage = {name = "rampage", width = size, height = size},
+        untouchable = {name = "untouchable", width = size, height = size, alias = "nightmare"},
+        invincible = {name = "invincible", width = size, height = size, alias = "boogeyman"},
+        inconceivable = {name = "inconceivable", width = size, height = size, alias = "grim_reaper"},
+        unfriggenbelievable = {
+            name = "unfriggenbelievable",
+            width = size,
+            height = size,
+            alias = "demon"
+        },
+        comebackKill = {name = "comeback_kill", width = size, height = size},
+
+        -- Bonus
+        firstStrike = {name = "first_strike", width = size, height = size},
+        fromTheGrave = {name = "from_the_grave", width = size, height = size},
+        closeCall = {name = "close_call", width = size, height = size},
+        snapshot = {name = "snapshot_kill", width = size, height = size},
+
         -- CTF
-        flagCapture = {name = "flag_capture", width = defaultMedalSize, height = defaultMedalSize},
-        flagRunner = {name = "flag_runner", width = defaultMedalSize, height = defaultMedalSize},
-        flagChampion = {name = "flag_champion", width = defaultMedalSize, height = defaultMedalSize},
-    
+        flagCapture = {name = "flag_capture", width = size, height = size},
+        flagRunner = {name = "flag_runner", width = size, height = size},
+        flagChampion = {name = "flag_champion", width = size, height = size},
+
         hitmarkerHit = {
             name = "hitmarker",
-            width = defaultMedalSize,
-            height = defaultMedalSize,
+            width = size,
+            height = size,
             renderGroup = "crosshair",
             noHudMessage = true
         },
         hitmarkerKill = {
             name = "hitmarker_kill",
-            width = defaultMedalSize,
-            height = defaultMedalSize,
+            width = size,
+            height = size,
             renderGroup = "crosshair",
             noHudMessage = true
         }

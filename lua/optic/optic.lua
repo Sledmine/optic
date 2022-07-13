@@ -141,6 +141,10 @@ function OnScriptLoad()
         if (sprite.name) then
             local medalImagePath = image(sprite.name)
             local medalSoundPath = audio(sprite.name)
+            if not file_exists(medalImagePath) then
+                medalImagePath = image(sprite.alias)
+                medalSoundPath = audio(sprite.alias)
+            end
             dprint("Loading sprite: " .. sprite.name)
             dprint("Image: " .. medalImagePath)
             if (file_exists(medalImagePath)) then
@@ -159,11 +163,11 @@ function OnScriptLoad()
 
     for event, sound in pairs(sounds) do
         if (sound.name) then
-            local medalSoundPath = audio(sound.name)
+            local soundPath = audio(sound.name)
             dprint("Loading sound: " .. sound.name)
-            dprint("Sound: " .. medalSoundPath)
-            if (file_exists(medalSoundPath)) then
-                harmonySounds[sound.name] = optic.create_sound(medalSoundPath)
+            dprint("Sound: " .. soundPath)
+            if (file_exists(soundPath)) then
+                harmonySounds[sound.name] = optic.create_sound(soundPath)
             end
         end
     end
@@ -184,6 +188,10 @@ function OnScriptLoad()
     -- Create sprites render queue
     renderQueue = optic.create_render_queue(50, (screenHeight / 2), 255, 0, 4000, 0, fadeInAnimation,
                               fadeOutAnimation, slideAnimation)
+
+    -- Create crosshair render queue
+    crosshairQueue = optic.create_render_queue((screenWidth - sprites.hitmarkerHit.width) / 2,
+                                (screenHeight - sprites.hitmarkerHit.height) / 2, 255, 0, 200)
 
     -- Create audio engine instance
     audioEngine = optic.create_audio_engine()
@@ -209,21 +217,23 @@ local function medal(sprite)
         medalsQueue[#medalsQueue + 1] = sprite.name
         local renderGroup = sprite.renderGroup
         local harmonySprite = harmonySprites[sprite.name]
-        if (renderGroup) then
-            -- Crosshair sprite
-            --optic.render_sprite(harmonySprite, renderQueue)
-
-        else
-            optic.render_sprite(harmonySprite, renderQueue)
-            if (sprite.hasAudio) then
-                local harmonyAudio = harmonySounds[sprite.name]
-                optic.play_sound(harmonyAudio, audioEngine)
+        if harmonySprite then
+            if (renderGroup) then
+                -- Crosshair sprite
+                -- TODO Fix crosshair sprite position, is used by the hitmarker
+                optic.render_sprite(harmonySprite, crosshairQueue)
+            else
+                optic.render_sprite(harmonySprite, renderQueue)
+                if (sprite.hasAudio) then
+                    local harmonyAudio = harmonySounds[sprite.name]
+                    optic.play_sound(harmonyAudio, audioEngine)
+                end
             end
-        end
-        if (configuration.hudMessages) then
-            if (not sprite.name:find("hitmarker")) then
-                hud_message(toSentenceCase(sprite.name))
-            end                
+            if (configuration.hudMessages) then
+                if (not sprite.name:find("hitmarker")) then
+                    hud_message(toSentenceCase(sprite.name))
+                end
+            end
         end
     else
         console_out("Error, medals were not loaded properly!")
@@ -231,7 +241,11 @@ local function medal(sprite)
 end
 
 local function sound(sound)
-    optic.play_sound(harmonySounds[sound.name], audioEngine)
+    if harmonySounds[sound.name] then
+        optic.play_sound(harmonySounds[sound.name], audioEngine)
+    else
+        dprint("Warning, sound " .. sound.name .. " was not loaded!")
+    end
 end
 
 function OnMultiplayerSound(soundEventName)
@@ -394,11 +408,10 @@ function OnMultiplayerEvent(eventName, localId, killerId, victimId)
     if (eventName == events.localCtfScore) then
         playerData.flagCaptures = playerData.flagCaptures + 1
         medal(sprites.flagCapture)
-
         if (playerData.flagCaptures == 2) then
             medal(sprites.flagRunner)
         elseif (playerData.flagCaptures == 3) then
-            medal(sprites.flagChampion) 
+            medal(sprites.flagChampion)
         end
     end
 
