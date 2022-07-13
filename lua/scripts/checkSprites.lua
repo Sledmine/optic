@@ -17,21 +17,18 @@ local function checkSprites(medalsStyle)
         local name = fileName:gsub(".mp3", "")
         sounds[name] = true
     end
+    print("[" .. medalsStyle .. "]")
     for _, sprite in pairs(sprites) do
-        --if not images[sprite.name] or not oggs[sprite.name] or not sounds[sprite.name] then
-        if not images[sprite.name] or not oggs[sprite.name] then
-            io.write(medalsStyle .. " -> " .. sprite.name .. " - ")
+        if sprite.name then
+            if not images[sprite.name] and (sprite.alias and not images[sprite.alias]) then
+                print("Missing image: " .. sprite.name)
+            end
         end
-        if not images[sprite.name] then
-            io.write("IMAGE ")
+        if sprite.name then
+            if not sounds[sprite.name] and (sprite.alias and not oggs[sprite.alias]) then
+                print("Missing ogg: " .. sprite.name)
+            end
         end
-        if not oggs[sprite.name] then
-            io.write("OGG ")
-        end
-        --if not sounds[sprite.name] then
-        --    io.write("SOUND ")
-        --end
-        print("")
     end
     print("")
 end
