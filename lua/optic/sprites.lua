@@ -11,7 +11,7 @@ local function sprites(size)
         overkill = {name = "overkill", width = size, height = size},
         killtacular = {name = "killtacular", width = size, height = size},
         killtrocity = {name = "killtrocity", width = size, height = size},
-        killaminjaro = {name = "killaminjaro", width = size, height = size},
+        killamanjaro = {name = "killamanjaro", width = size, height = size},
         killtastrophe = {name = "killtastrophe", width = size, height = size},
         killpocalypse = {name = "killpocalypse", width = size, height = size},
         killionaire = {name = "killionaire", width = size, height = size},
@@ -36,10 +36,10 @@ local function sprites(size)
         firstStrike = {name = "first_strike", width = size, height = size},
         fromTheGrave = {name = "from_the_grave", width = size, height = size},
         closeCall = {name = "close_call", width = size, height = size},
-        snapshot = {name = "snapshot_kill", width = size, height = size},
+        snapshot = {name = "snapshot", width = size, height = size},
 
         -- CTF
-        flagCapture = {name = "flag_capture", width = size, height = size},
+        flagCaptured = {name = "flag_captured", width = size, height = size},
         flagRunner = {name = "flag_runner", width = size, height = size},
         flagChampion = {name = "flag_champion", width = size, height = size},
 

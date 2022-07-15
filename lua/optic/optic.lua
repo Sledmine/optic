@@ -1,4 +1,5 @@
 local glue = require "glue"
+local deepcopy = glue.deepcopy
 clua_version = 2.056
 
 -- Modules
@@ -13,11 +14,7 @@ local DebugMode = false
 local opticVersion = "3.0.0"
 
 -- Controlled by optic.json config file, do not edit on the script!
-local configuration = {
-    hitmarker = true,
-    hudMessages = true,
-    style = "halo_4"
-}
+local configuration = {hitmarker = true, hudMessages = true, style = "halo_4", volume = 50}
 
 local function dprint(message)
     if (DebugMode) then
@@ -49,14 +46,23 @@ local events = {
     ctfEnemyFlagIdleReturned = "ctf enemy flag idle returned"
 }
 
-local soundsEvents = {
-    hitmarker = "ting"
-}
+local soundsEvents = {hitmarker = "ting"}
 
 local imagesPath = "%s/images/%s.png"
 local soundsPath = "%s/sounds/%s.mp3"
 local opticStylePath = "%s/style.json"
-local playerData = {deaths = 0, kills = 0, noKillSinceDead = false, killingSpreeCount = 0}
+local playerData = {
+    deaths = 0,
+    kills = 0,
+    noKillSinceDead = false,
+    killingSpreeCount = 0,
+    dyingSpreeCount = 0,
+    multiKillCount = 0,
+    multiKillTimestamp = nil,
+    flagCaptures = 0
+}
+local defaultPlayerData = deepcopy(playerData)
+
 local screenWidth = read_word(0x637CF2)
 local screenHeight = read_word(0x637CF0)
 -- FIXME There should be a better way to scale this, I just did simple math to obtain this value
@@ -131,10 +137,7 @@ function OnScriptLoad()
 
     sprites = createSprites(defaultMedalSize)
 
-    sounds = {
-        suicide = {name = "suicide"},
-        betrayal = {name = "betrayal"}
-    }
+    sounds = {suicide = {name = "suicide"}, betrayal = {name = "betrayal"}}
 
     -- Create sprites
     for event, sprite in pairs(sprites) do
@@ -150,12 +153,14 @@ function OnScriptLoad()
             if (file_exists(medalImagePath)) then
                 if (file_exists(medalSoundPath)) then
                     dprint("Sound: " .. medalSoundPath)
-                    harmonySprites[sprite.name] = optic.create_sprite(medalImagePath, sprite.width, sprite.height)
+                    harmonySprites[sprite.name] = optic.create_sprite(medalImagePath, sprite.width,
+                                                                      sprite.height)
                     harmonySounds[sprite.name] = optic.create_sound(medalSoundPath)
                     sprites[event].hasAudio = true
                 else
                     -- dprint("Warning, there is no sound for this sprite!")
-                    harmonySprites[sprite.name] = optic.create_sprite(medalImagePath, sprite.width, sprite.height)
+                    harmonySprites[sprite.name] = optic.create_sprite(medalImagePath, sprite.width,
+                                                                      sprite.height)
                 end
             end
         end
@@ -173,28 +178,26 @@ function OnScriptLoad()
     end
 
     -- Fade in animation
-    local fadeInAnimation = optic.create_animation(200)
+    local fadeInAnimation = optic.create_animation(300)
     optic.set_animation_property(fadeInAnimation, "ease in", "position x", defaultMedalSize)
     optic.set_animation_property(fadeInAnimation, "ease in", "opacity", 255)
 
     -- Fade out animation
-    local fadeOutAnimation = optic.create_animation(200)
+    local fadeOutAnimation = optic.create_animation(400)
     optic.set_animation_property(fadeOutAnimation, "ease out", "opacity", -255)
 
     -- Slide animation
-    local slideAnimation = optic.create_animation(300)
+    local slideAnimation = optic.create_animation(250)
     optic.set_animation_property(slideAnimation, 0.4, 0.0, 0.6, 1.0, "position x", defaultMedalSize)
 
     -- Create sprites render queue
-    renderQueue = optic.create_render_queue(50, (screenHeight / 2), 255, 0, 4000, 0, fadeInAnimation,
-                              fadeOutAnimation, slideAnimation)
-
-    -- Create crosshair render queue
-    crosshairQueue = optic.create_render_queue((screenWidth - sprites.hitmarkerHit.width) / 2,
-                                (screenHeight - sprites.hitmarkerHit.height) / 2, 255, 0, 200)
+    renderQueue = optic.create_render_queue(50, (screenHeight / 2) - (defaultMedalSize / 2), 255, 0,
+                                            4000, 0, fadeInAnimation, fadeOutAnimation,
+                                            slideAnimation)
 
     -- Create audio engine instance
-    audioEngine = optic.create_audio_engine()
+    AudioEngine = optic.create_audio_engine()
+    harmony.optic.set_audio_engine_gain(AudioEngine, configuration.volume or 50)
 
     medalsLoaded = true
 
@@ -218,15 +221,16 @@ local function medal(sprite)
         local renderGroup = sprite.renderGroup
         local harmonySprite = harmonySprites[sprite.name]
         if harmonySprite then
+            -- TODO Add render group discrimination
             if (renderGroup) then
                 -- Crosshair sprite
-                -- TODO Fix crosshair sprite position, is used by the hitmarker
-                optic.render_sprite(harmonySprite, crosshairQueue)
+                optic.render_sprite(harmonySprite, (screenWidth - sprites.hitmarkerHit.width) / 2,
+                                    (screenHeight - sprites.hitmarkerHit.height) / 2, 255, 0, 200)
             else
                 optic.render_sprite(harmonySprite, renderQueue)
                 if (sprite.hasAudio) then
                     local harmonyAudio = harmonySounds[sprite.name]
-                    optic.play_sound(harmonyAudio, audioEngine)
+                    optic.play_sound(harmonyAudio, AudioEngine)
                 end
             end
             if (configuration.hudMessages) then
@@ -242,7 +246,7 @@ end
 
 local function sound(sound)
     if harmonySounds[sound.name] then
-        optic.play_sound(harmonySounds[sound.name], audioEngine)
+        optic.play_sound(harmonySounds[sound.name], AudioEngine)
     else
         dprint("Warning, sound " .. sound.name .. " was not loaded!")
     end
@@ -277,7 +281,6 @@ function OnMultiplayerEvent(eventName, localId, killerId, victimId)
     dprint("localId: " .. tostring(localId))
     dprint("killerId: " .. tostring(killerId))
     dprint("victimId: " .. tostring(victimId))
-    
     if (eventName == events.localKilledPlayer) then
         local player = blam.biped(get_dynamic_player())
         local victim = blam.biped(victimId)
@@ -329,7 +332,7 @@ function OnMultiplayerEvent(eventName, localId, killerId, victimId)
             -- Bump up killing spree count
             if (localId == killerId) then
                 playerData.killingSpreeCount = playerData.killingSpreeCount + 1
-        
+
                 -- Killing spree medals
                 if (playerData.killingSpreeCount == 5) then
                     medal(sprites.killingSpree)
@@ -348,23 +351,23 @@ function OnMultiplayerEvent(eventName, localId, killerId, victimId)
                 elseif (playerData.killingSpreeCount == 40) then
                     medal(sprites.unfriggenbelievable)
                 end
-        
+
                 -- Comeback kill medal
                 if (playerData.dyingSpreeCount <= -3) then
                     playerData.dyingSpreeCount = 0
                     medal(sprites.comebackKill)
                 end
-        
+
                 -- Multikill medals
                 if (playerData.multiKillTimestamp == nil) then
                     playerData.multiKillTimestamp = os.time()
                     playerData.multiKillCount = 1
                 else
                     playerData.multiKillCount = playerData.multiKillCount + 1
-        
+
                     -- Check if the 4.5 seconds have already elapsed
                     local time = os.time() - playerData.multiKillTimestamp
-                    if(time < 4.5) then
+                    if (time < 4.5) then
                         if (playerData.multiKillCount == 2) then
                             medal(sprites.doubleKill)
                         elseif (playerData.multiKillCount == 3) then
@@ -390,7 +393,7 @@ function OnMultiplayerEvent(eventName, localId, killerId, victimId)
                     end
                 end
             end
-            
+
             -- Count player dead
             if (localId == victimId) then
                 playerData.killingSpreeCount = 0
@@ -407,7 +410,7 @@ function OnMultiplayerEvent(eventName, localId, killerId, victimId)
     -- CTF medals
     if (eventName == events.localCtfScore) then
         playerData.flagCaptures = playerData.flagCaptures + 1
-        medal(sprites.flagCapture)
+        medal(sprites.flagCaptured)
         if (playerData.flagCaptures == 2) then
             medal(sprites.flagRunner)
         elseif (playerData.flagCaptures == 3) then
@@ -429,9 +432,9 @@ end
 function OnCommand(command)
     if (command == "optic_test" or command == "otest") then
         medal(sprites.firstStrike)
-        medal(sprites.runningRiot)
         medal(sprites.doubleKill)
-        medal(sprites.killtacular)
+        medal(sprites.tripleKill)
+        medal(sprites.overkill)
         if (configuration.hitmarker) then
             medal(sprites.hitmarkerHit)
         end
@@ -443,7 +446,7 @@ function OnCommand(command)
     elseif (command == "optic_version" or command == "oversion") then
         console_out(opticVersion)
         return false
-    elseif (command == "optic_reload"  or command == "oreload") then
+    elseif (command == "optic_reload" or command == "oreload") then
         loadOpticConfiguration()
         return false
     elseif (command:find "optic_style") then
@@ -451,12 +454,20 @@ function OnCommand(command)
         local style = params[2]
         if (style and directory_exists(style)) then
             configuration.style = style
-            console_out("Success, optic style loaded.")
+            console_out("Success, optic style loaded")
             saveOpticConfiguration()
             loadOpticConfiguration()
             return false
         end
-        console_out("Error at loading optic style.")
+        console_out("Error at loading optic style")
+        return false
+    elseif command:find "optic_volume" or command:find "ovolume" then
+        local params = glue.string.split(command, " ")
+        local volume = tonumber(params[2]) or 1
+        configuration.volume = volume
+        harmony.optic.set_audio_engine_gain(AudioEngine, configuration.volume)
+        console_out("Optic volume set to " .. volume)
+        saveOpticConfiguration()
         return false
     end
 end
@@ -467,12 +478,8 @@ function OnMapLoad()
         console_out("Error, medals were not loaded properly!")
     end
 
-    -- Reset counts
-    playerData.killingSpreeCount = 0
-    playerData.dyingSpreeCount = 0
-    playerData.multiKillCount = 0
-    playerData.multiKillTimestamp = nil
-    playerData.flagCaptures = 0
+    -- Reset player state
+    playerData = deepcopy(defaultPlayerData)
 end
 
 set_callback("command", "OnCommand")
