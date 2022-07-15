@@ -1,5 +1,6 @@
 local fs = require "fs"
 local sprites = require "lua.optic.sprites"()
+local inspect = require "inspect"
 
 local function checkSprites(medalsStyle)
     local images = {}
@@ -7,27 +8,24 @@ local function checkSprites(medalsStyle)
         local name = fileName:gsub(".png", "")
         images[name] = true
     end
-    local oggs = {}
-    for fileName, entry in fs.dir(("data/%s/sounds/ogg"):format(medalsStyle)) do
+    local sourceSound = {}
+    for fileName, entry in fs.dir(("data/%s/sounds/source"):format(medalsStyle)) do
         local name = fileName:gsub(".ogg", "")
-        oggs[name] = true
+        name = name:gsub(".wav", "")
+        sourceSound[name] = true
     end
-    local sounds = {}
-    for fileName, entry in fs.dir(("data/%s/sounds"):format(medalsStyle)) do
-        local name = fileName:gsub(".mp3", "")
-        sounds[name] = true
-    end
+    -- local sounds = {}
+    -- for fileName, entry in fs.dir(("data/%s/sounds"):format(medalsStyle)) do
+    --    local name = fileName:gsub(".mp3", "")
+    --    sounds[name] = true
+    -- end
     print("[" .. medalsStyle .. "]")
     for _, sprite in pairs(sprites) do
-        if sprite.name then
-            if not images[sprite.name] and (sprite.alias and not images[sprite.alias]) then
-                print("Missing image: " .. sprite.name)
-            end
+        if not images[sprite.name] and not images[sprite.alias or sprite.name] then
+            print("Image: " .. sprite.name)
         end
-        if sprite.name then
-            if not sounds[sprite.name] and (sprite.alias and not oggs[sprite.alias]) then
-                print("Missing ogg: " .. sprite.name)
-            end
+        if not sourceSound[sprite.name] and not sourceSound[sprite.alias or sprite.name] then
+            print("Sound: " .. sprite.name)
         end
     end
     print("")
