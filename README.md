@@ -1,7 +1,7 @@
 
 <html>
     <p align="center">
-        <img width="250px" src="img/optic-logo.png"/>
+        <img width="200px" src="img/optic-logo.png"/>
     </p>
     <h1 align="center">Optic</h1>
     <p align="center">
@@ -34,10 +34,11 @@ standard for medals available to recreate on Halo Custom Edition.
 - Kill
 - Double Kill
 - Triple Kill
-- Killtacular
+- Overkill
 - Killing Spree
+- Killtacular
 - Running Riot
-- Snapshot (Beta)
+- Snapshot
 - Rocket Kill
 - Needler Kill
 - Close Call
@@ -50,7 +51,7 @@ New medals will be added later on further development, be sure to follow us on o
 new medals.
 
 # FAQ
-## Why are not there many medals as HAC2 once had?
+## Why I can't use medal packs as how HAC2 once had?
 This is an entire new project that uses Harmony as the core tool to render medals animations on the 
 game, meaning that the engine or system to handle game actions to eventually convert them into 
 medals, needed to be built from zero in order to create a better and flexible system than the
@@ -61,21 +62,14 @@ This optic project uses lua-blam as a tool to determine different events happeni
 if the map you are playing is "protected" lua-blam will have some problems at getting the required
 information from the game memory resulting in some medals not being able to be triggered.
 
-## Why is there no sound on some medals?
-Halo has internal sounds for some game events by default, playing custom external sounds is coming
-thanks to harmony>1.0.0 (current dependency for optic), Jerry is working on finishing some changes
-to the sounds API, so sounds will come soon!
-
 ## Why some medals does not have an announcer sound?
 As we are attempting to provide a set of standard medals for Halo Custom Edition independent of the
-style you want to see in game, some of the medals were renamed or redisgned to appear in other
-medals style or ported to work in a style were those medals originally were not there, so it
-is a mod decision to remove some aspects from specific medals aspects to make them work across
-styles.
+style you want to see in game, some of the medals were renamed or redesigned to appear in other
+medals style or ported to work in a style were those medals originally were not there, so the mod
+attempts to remove some aspects from specific medals to make them work across styles when possible.
 
 # Medals Adjustments
 
 - Halo 4 -> Super Combine -> Needler Kill
 - Halo Infinite -> Breacher -> Needler Kill
-- Halo Infinite -> First Strike (redisigned cause it does not exist originally)
-- 
+- Halo Infinite -> First Strike (redesigned cause it does not exist originally)
