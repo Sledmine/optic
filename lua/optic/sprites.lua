@@ -52,8 +52,8 @@ local function sprites(size)
         },
         hitmarkerKill = {
             name = "hitmarker_kill",
-            width = size,
-            height = size,
+            width = size * 1.25,
+            height = size * 1.25,
             renderGroup = "crosshair",
             noHudMessage = true
         }
