@@ -1,3 +1,10 @@
+# 3.0.0
+- Updated to latest Harmony API (allows Optic to work again with other mods installed)
+- Added new medals for Halo 4 and Halo Infinite styles
+- Normalized audio volume across styles
+- Fixed some issues with kill streak stacking
+- Added `optic_style <style>` and `optic_volume <volume>` commands
+
 # 1.1.3
 - Fix bug where some multiplayer stock sounds were not playing
 
