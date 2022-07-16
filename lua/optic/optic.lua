@@ -50,7 +50,7 @@ local soundsEvents = {hitmarker = "ting"}
 
 local imagesPath = "%s/images/%s.png"
 local soundsPath = "%s/sounds/%s.mp3"
-local opticStylePath = "%s/style.json"
+local opticStylePath = "%s/sprites.style"
 local playerData = {
     deaths = 0,
     kills = 0,
