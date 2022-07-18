@@ -1,20 +1,27 @@
-local glue = require "glue"
-local deepcopy = glue.deepcopy
 clua_version = 2.056
 
 -- Modules
+local glue = require "glue"
+local deepcopy = glue.deepcopy
 local harmony = require "mods.harmony"
 local optic = harmony.optic
 local blam = require "blam"
 local json = require "json"
 local glue = require "glue"
 local createSprites = require "optic.sprites"
--- Switches
-local DebugMode = false
+-- Constants
 local opticVersion = "3.0.0"
+-- Switches
+DebugMode = false
 
 -- Controlled by optic.json config file, do not edit on the script!
-local configuration = {enableSound = true, hitmarker = true, hudMessages = true, style = "halo_4", volume = 50}
+local configuration = {
+    enableSound = true,
+    hitmarker = true,
+    hudMessages = true,
+    style = "halo_4",
+    volume = 50
+}
 
 local function dprint(message)
     if (DebugMode) then
@@ -157,7 +164,7 @@ function OnScriptLoad()
                                                                       sprite.height)
                     if configuration.enableSound then
                         harmonySounds[sprite.name] = optic.create_sound(medalSoundPath)
-                        sprites[event].hasAudio = true 
+                        sprites[event].hasAudio = true
                     end
                 else
                     -- dprint("Warning, there is no sound for this sprite!")
@@ -197,8 +204,6 @@ function OnScriptLoad()
     -- Hitmarker kill fade animation
     hitmarkerFadeAnimation = optic.create_animation(80)
     optic.set_animation_property(hitmarkerFadeAnimation, "linear", "opacity", -255)
-    
-
 
     -- Create sprites render queue
     renderQueue = optic.create_render_queue(50, (screenHeight / 2) - (defaultMedalSize / 2), 255, 0,
@@ -210,7 +215,7 @@ function OnScriptLoad()
         AudioEngine = optic.create_audio_engine()
         harmony.optic.set_audio_engine_gain(AudioEngine, configuration.volume or 50)
     end
-    
+
     medalsLoaded = true
 
     -- Load medals callback
@@ -237,11 +242,15 @@ local function medal(sprite)
             if (renderGroup) then
                 -- Crosshair sprite
                 if sprite.name == "hitmarker" then
-                    optic.render_sprite(harmonySprite, (screenWidth - sprites.hitmarkerHit.width) / 2,
-                                    (screenHeight - sprites.hitmarkerHit.height) / 2, 255, 0, 200)
+                    optic.render_sprite(harmonySprite,
+                                        (screenWidth - sprites.hitmarkerHit.width) / 2,
+                                        (screenHeight - sprites.hitmarkerHit.height) / 2, 255, 0,
+                                        200)
                 else
-                    optic.render_sprite(harmonySprite, (screenWidth - sprites.hitmarkerKill.width) / 2,
-                                    (screenHeight - sprites.hitmarkerKill.height) / 2, 255, 0, 200, hitmarkerEnterAnimation, hitmarkerFadeAnimation)
+                    optic.render_sprite(harmonySprite,
+                                        (screenWidth - sprites.hitmarkerKill.width) / 2,
+                                        (screenHeight - sprites.hitmarkerKill.height) / 2, 255, 0,
+                                        200, hitmarkerEnterAnimation, hitmarkerFadeAnimation)
                 end
             else
                 optic.render_sprite(harmonySprite, renderQueue)
