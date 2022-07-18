@@ -32,17 +32,33 @@ Right now the project is aiming to provide an acceptable quantity of medals from
 standard for medals available to recreate on Halo Custom Edition.
 
 - Kill
+- Rocket Kill
+- Needler Kill
 - Double Kill
 - Triple Kill
 - Overkill
-- Killing Spree
 - Killtacular
+- Killtrocity
+- Killamanjaro
+- Killtastrophe
+- Killpocalypse
+- Killionaire
+- Killing Spree
+- Killing Frenzy
 - Running Riot
-- Snapshot
-- Rocket Kill
-- Needler Kill
-- Close Call
+- Rampage
+- Untouchable (Nightmare)
+- Invincible (Boogeyman)
+- Inconceivable (Grim Reaper)
+- Unfriggenbelievable (Demon)
+- Comback Kill
 - First Strike
+- From The Grave
+- Close Call
+- Snapshot
+- Flag Captured
+- Flag Runner
+- Flag Champion
 
 Also this project provides simple hitmaker support.
 
