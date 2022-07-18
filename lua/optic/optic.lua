@@ -489,6 +489,11 @@ function OnCommand(command)
         console_out("Optic volume set to " .. volume)
         saveOpticConfiguration()
         return false
+    elseif command == "optic_sound" or command == "osound" then
+        configuration.enableSound = not configuration.enableSound
+        console_out("Optic sound: " .. tostring(configuration.enableSound))
+        saveOpticConfiguration()
+        return false
     end
 end
 
