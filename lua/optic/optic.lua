@@ -14,7 +14,7 @@ local DebugMode = false
 local opticVersion = "3.0.0"
 
 -- Controlled by optic.json config file, do not edit on the script!
-local configuration = {ActiveSound = true, hitmarker = true, hudMessages = true, style = "halo_4", volume = 50}
+local configuration = {enableSound = true, hitmarker = true, hudMessages = true, style = "halo_4", volume = 50}
 
 local function dprint(message)
     if (DebugMode) then
@@ -155,8 +155,10 @@ function OnScriptLoad()
                     dprint("Sound: " .. medalSoundPath)
                     harmonySprites[sprite.name] = optic.create_sprite(medalImagePath, sprite.width,
                                                                       sprite.height)
-                    harmonySounds[sprite.name] = optic.create_sound(medalSoundPath)
-                    sprites[event].hasAudio = true
+                    if configuration.enableSound then
+                        harmonySounds[sprite.name] = optic.create_sound(medalSoundPath)
+                        sprites[event].hasAudio = true 
+                    end
                 else
                     -- dprint("Warning, there is no sound for this sprite!")
                     harmonySprites[sprite.name] = optic.create_sprite(medalImagePath, sprite.width,
@@ -204,7 +206,7 @@ function OnScriptLoad()
                                             slideAnimation)
 
     -- Create audio engine instance
-    if ActiveSound == true then
+    if configuration.enableSound then
         AudioEngine = optic.create_audio_engine()
         harmony.optic.set_audio_engine_gain(AudioEngine, configuration.volume or 50)
     end
@@ -243,7 +245,7 @@ local function medal(sprite)
                 end
             else
                 optic.render_sprite(harmonySprite, renderQueue)
-                if (sprite.hasAudio) and ActiveSound == true then
+                if sprite.hasAudio and configuration.enableSound then
                     local harmonyAudio = harmonySounds[sprite.name]
                     optic.play_sound(harmonyAudio, AudioEngine)
                 end
@@ -260,7 +262,7 @@ local function medal(sprite)
 end
 
 local function sound(sound)
-    if harmonySounds[sound.name] and ActiveSound == true then
+    if harmonySounds[sound.name] and configuration.enableSound then
         optic.play_sound(harmonySounds[sound.name], AudioEngine)
     else
         dprint("Warning, sound " .. sound.name .. " was not loaded!")
