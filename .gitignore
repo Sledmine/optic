@@ -47,6 +47,5 @@ luac.out
 
 # Distribution
 dist/
-package/
 todo/
 optic.json
