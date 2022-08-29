@@ -1,0 +1,16 @@
+{
+    "manifestVersion": "1.1.0",
+    "files": [],
+    "dependencies": [
+        {
+            "label": "harmony",
+            "version": "3.0.0"
+        }
+    ],
+    "label": "optic",
+    "version": "3.0.2",
+    "category": "script",
+    "author": "Sledmine, JerryBrick",
+    "name": "Optic",
+    "description": "Optic medals for Halo Custom Edition using Harmony"
+}
