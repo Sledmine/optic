@@ -1,5 +1,5 @@
 {
-    "target": "lua53",
+    "target": "lua5.3",
     "output": "dist/optic.lua",
     "main": "lua/optic/optic",
     "name": "Optic",
