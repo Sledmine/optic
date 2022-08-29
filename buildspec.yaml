@@ -1,0 +1,12 @@
+version: 1
+commands:
+  package:
+    - mercury luabundle
+    - cp dist/optic.lua package/lua-global/optic.lua
+    - cp -r data/ package/lua-data-global
+    - mv package/lua-data-global/data package/lua-data-global/optic
+    - mercury pack package/ dist/
+    - rm -rf package/lua-data-global/optic
+    - rm -f package/lua-global/optic.lua
+  release:
+    - mercury build package
