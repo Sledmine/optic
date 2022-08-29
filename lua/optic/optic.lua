@@ -119,7 +119,7 @@ local function loadOpticConfiguration()
     dprint("Loading optic configuration...")
     local opticConfiguration = read_file("optic.json")
     if (opticConfiguration) then
-        configuration = json.decode(opticConfiguration)
+        configuration = glue.update(configuration, json.decode(opticConfiguration))
         dprint("Success, configuration loaded correctly.")
         loadOpticStyle()
         return true
@@ -307,17 +307,17 @@ function OnMultiplayerEvent(eventName, localId, killerId, victimId)
     dprint("localId: " .. tostring(localId))
     dprint("killerId: " .. tostring(killerId))
     dprint("victimId: " .. tostring(victimId))
-    if (eventName == events.localKilledPlayer) then
+    if eventName == events.localKilledPlayer then
         local player = blam.biped(get_dynamic_player())
         local victim = blam.biped(victimId)
-        if (victim) then
+        if victim then
             dprint("Victim is alive!")
         end
-        if (player) then
+        if player then
             local firstPerson = blam.firstPerson()
-            if (firstPerson) then
+            if firstPerson then
                 local weapon = blam.weapon(get_object(firstPerson.weaponObjectId))
-                if (weapon) then
+                if weapon then
                     local tag = blam.getTag(weapon.tagId)
                     if (tag and blam.isNull(player.vehicleObjectId)) then
                         if (tag.path:find("sniper")) then
@@ -325,9 +325,9 @@ function OnMultiplayerEvent(eventName, localId, killerId, victimId)
                             if (blam.isNull(player.zoomLevel) and player.weaponPTH) then
                                 medal(sprites.snapshot)
                             end
-                        elseif (tag.path:find("rocket")) then
+                        elseif tag.path:find("rocket") then
                             medal(sprites.rocketKill)
-                        elseif (tag.path:find("needler")) then
+                        elseif tag.path:find("needler") then
                             medal(sprites.supercombine)
                         end
                     end
@@ -345,7 +345,7 @@ function OnMultiplayerEvent(eventName, localId, killerId, victimId)
             if (allServerKills == 0 and localPlayer.kills == 1) then
                 medal(sprites.firstStrike)
             end
-            if (player.health <= 0.25) then
+            if player.health <= 0.25 then
                 medal(sprites.closeCall)
             end
             if (not isPreviousMedalKillVariation()) then
@@ -356,7 +356,7 @@ function OnMultiplayerEvent(eventName, localId, killerId, victimId)
             end
 
             -- Bump up killing spree count
-            if (localId == killerId) then
+            if localId == killerId then
                 playerData.killingSpreeCount = playerData.killingSpreeCount + 1
 
                 -- Killing spree medals
@@ -385,15 +385,15 @@ function OnMultiplayerEvent(eventName, localId, killerId, victimId)
                 end
 
                 -- Multikill medals
-                if (playerData.multiKillTimestamp == nil) then
+                if not playerData.multiKillTimestamp then
                     playerData.multiKillTimestamp = os.time()
                     playerData.multiKillCount = 1
                 else
                     playerData.multiKillCount = playerData.multiKillCount + 1
 
                     -- Check if the 4.5 seconds have already elapsed
-                    local time = os.time() - playerData.multiKillTimestamp
-                    if (time < 4.5) then
+                    local timeSinceLastMultiKill = os.time() - playerData.multiKillTimestamp
+                    if timeSinceLastMultiKill < 4.5 then
                         if (playerData.multiKillCount == 2) then
                             medal(sprites.doubleKill)
                         elseif (playerData.multiKillCount == 3) then
@@ -419,14 +419,6 @@ function OnMultiplayerEvent(eventName, localId, killerId, victimId)
                     end
                 end
             end
-
-            -- Count player dead
-            if (localId == victimId) then
-                playerData.killingSpreeCount = 0
-                playerData.dyingSpreeCount = playerData.dyingSpreeCount - 1
-                playerData.multiKillCount = 0
-                playerData.multiKillTimestamp = nil
-            end
         else
             dprint("Player is dead!")
             medal(sprites.fromTheGrave)
@@ -434,7 +426,7 @@ function OnMultiplayerEvent(eventName, localId, killerId, victimId)
     end
 
     -- CTF medals
-    if (eventName == events.localCtfScore) then
+    if eventName == events.localCtfScore then
         playerData.flagCaptures = playerData.flagCaptures + 1
         medal(sprites.flagCaptured)
         if (playerData.flagCaptures == 2) then
@@ -454,6 +446,17 @@ function OnMultiplayerEvent(eventName, localId, killerId, victimId)
     -- Betrayal sound
     if (eventName == events.betrayed and localId == victimId) then
         sound(sounds.betrayal)
+    end
+
+    if eventName == events.playerKill then
+        -- Count player dead
+        if (localId == killerId) then
+            dprint("Local player died!")
+            playerData.killingSpreeCount = 0
+            playerData.dyingSpreeCount = playerData.dyingSpreeCount - 1
+            playerData.multiKillCount = 0
+            playerData.multiKillTimestamp = nil
+        end
     end
 end
 
