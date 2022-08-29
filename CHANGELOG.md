@@ -1,24 +1,62 @@
-# 3.0.0
-- Updated to latest Harmony API (allows Optic to work again with other mods installed)
-- Added new medals for Halo 4 and Halo Infinite styles
+# Changelog
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [3.0.2] - 2022-08-28
+### Fixed
+- Unlimited kill streaks bug
+- Configuration properties being missed on newer releases
+
+## [3.0.1] - 2022-07-15
+### Added
+- Flag to enable or disable optic sounds (helps preventing crashing on some systems in the meantime)
+
+## [3.0.0] - 2022-07-15
+### Added
+- Commands `optic_style <style>` and `optic_volume <volume>`
+- New medals for Halo 4 and Halo Infinite styles
+
+### Changed
+- Latest Harmony API (allows Optic to work again with other mods installed)
 - Normalized audio volume across styles
-- Fixed some issues with kill streak stacking
-- Added `optic_style <style>` and `optic_volume <volume>` commands
 
-# 1.1.3
-- Fix bug where some multiplayer stock sounds were not playing
+### Fixed
+- Some issues with kill streak stacking
 
-# 1.1.2
-- Updated Harmony to 2.0.0 to prevent crashes and new API compatibility
+## [2.0.0] - 2021-12-18
+### Added
+- Sounds for medals
+- Configuration file to toggle optic features, select favorite optic style, etc
+- Halo Infinite medals and sounds (WIP)
+- Sound to suicide event
 
-# 1.1.1
-- Medals are now printing medal names to the HUD when rendered.
-- Fixed a potential crash at realoding scripts on old harmony versions < harmony-0.1.0 (forces update to harmony-1.0.0 is recomendable to update other mods depending on harmony, like Insurrection).
-- Add files to prepare an upcoming medals audio feature.
+## [1.1.3]
+### Fixed
+- Bug where some multiplayer stock sounds were not playing
 
-# 1.1.0
-- Added new first strike medal
-- Fixed medals scale and positioning issues on different resolutions
+## [1.1.2]
+### Changed
+- Harmony dependency to 2.0.0 to prevent crashes and new API compatibility
 
-# 1.0.0
+## [1.1.1]
+### Added
+- Files to prepare an upcoming medals audio feature
+
+### Changed
+- Medals are now printing medal names to the HUD when rendered
+
+### Fixed
+- Potential crash at reloading scripts on old harmony versions < harmony-0.1.0
+
+## [1.1.0]
+### Added
+- New first strike medal
+
+### Fixed
+- Medals scale and positioning issues on different resolutions
+
+## [1.0.0]
+### Added
 - Initial release
