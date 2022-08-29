@@ -1,6 +1,7 @@
 version: 1
 commands:
   package:
+    - mkdir -p dist
     - mercury luabundle
     - cp dist/optic.lua package/lua-global/optic.lua
     - cp -r data/ package/lua-data-global
