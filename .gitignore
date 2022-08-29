@@ -46,6 +46,7 @@ luac.out
 .idea
 
 # Distribution
+*.bak
 dist/
 todo/
 optic.json
