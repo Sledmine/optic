@@ -386,14 +386,14 @@ function OnMultiplayerEvent(eventName, localId, killerId, victimId)
 
                 -- Multikill medals
                 if not playerData.multiKillTimestamp then
-                    playerData.multiKillTimestamp = os.time()
+                    playerData.multiKillTimestamp = harmony.time.set_timestamp()
                     playerData.multiKillCount = 1
                 else
                     playerData.multiKillCount = playerData.multiKillCount + 1
 
                     -- Check if the 4.5 seconds have already elapsed
-                    local timeSinceLastMultiKill = os.time() - playerData.multiKillTimestamp
-                    if timeSinceLastMultiKill < 4.5 then
+                    local timeSinceLastMultiKill = harmony.time.get_elapsed_milliseconds(playerData.multiKillTimestamp)
+                    if timeSinceLastMultiKill < 4500 then
                         if (playerData.multiKillCount == 2) then
                             medal(sprites.doubleKill)
                         elseif (playerData.multiKillCount == 3) then
@@ -413,9 +413,16 @@ function OnMultiplayerEvent(eventName, localId, killerId, victimId)
                         elseif (playerData.multiKillCount == 10) then
                             medal(sprites.killionaire)
                         end
+
+                        if(playerData.multiKillCount < 10) then
+                            playerData.multiKillTimestamp = harmony.time.set_timestamp()
+                        else
+                            playerData.multiKillTimestamp = nil
+                            playerData.multiKillCount = 0
+                        end
                     else
-                        playerData.multiKillCount = 0
-                        playerData.multiKillTimestamp = nil
+                        playerData.multiKillTimestamp = harmony.time.set_timestamp()
+                        playerData.multiKillCount = 1
                     end
                 end
             end
