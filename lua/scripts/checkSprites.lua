@@ -1,5 +1,5 @@
 local fs = require "fs"
-local sprites = require "lua.optic.sprites"()
+local sprites = require "lua.optic.sprites"(1)
 local inspect = require "inspect"
 
 local function checkSprites(medalsStyle)
