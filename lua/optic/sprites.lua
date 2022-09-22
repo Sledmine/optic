@@ -11,7 +11,7 @@ local function sprites(size)
         overkill = {name = "overkill", width = size, height = size},
         killtacular = {name = "killtacular", width = size, height = size},
         killtrocity = {name = "killtrocity", width = size, height = size},
-        killamanjaro = {name = "killamanjaro", width = size, height = size},
+        killimanjaro = {name = "killimanjaro", width = size, height = size},
         killtastrophe = {name = "killtastrophe", width = size, height = size},
         killpocalypse = {name = "killpocalypse", width = size, height = size},
         killionaire = {name = "killionaire", width = size, height = size},
