@@ -10,7 +10,7 @@ local json = require "json"
 local glue = require "glue"
 local createSprites = require "optic.sprites"
 -- Constants
-local opticVersion = "3.0.0"
+local opticVersion = "3.1.0"
 -- Switches
 DebugMode = false
 
